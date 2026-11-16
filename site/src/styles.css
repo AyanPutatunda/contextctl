@@ -56,7 +56,8 @@ code{font-family:var(--mono);font-size:.9em;background:#eef2f7;padding:.1em .35e
 h2{font-size:clamp(1.7rem,3vw,2.3rem);letter-spacing:-.02em;line-height:1.15;margin:0 0 16px}
 h3{font-size:1.2rem;margin:34px 0 12px}
 .intro{font-size:1.12rem;color:var(--ink2);max-width:74ch}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:start}
+.two>*{min-width:0}
 @media (max-width:900px){.two{grid-template-columns:1fr;gap:28px}}
 .grid4{list-style:none;padding:0;margin:28px 0 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px;counter-reset:g}
 .grid4 li{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px;counter-increment:g}
@@ -87,7 +88,9 @@ caption{text-align:left;padding:14px 16px 4px;font-weight:650;color:var(--ink2)}
 th,td{text-align:left;padding:10px 16px;border-bottom:1px solid var(--line);vertical-align:top}
 thead th{background:#f1f5f9;font-weight:700;font-size:.88rem;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
 tbody tr:last-child td{border-bottom:0}
-.results td:not(:first-child){font-family:var(--mono);font-size:.9rem;white-space:nowrap}
+.results td{font-family:var(--mono);font-size:.88rem}
+.results th[scope=row]{font-weight:600}
+@media (min-width:700px){.results th[scope=row]{min-width:220px}}
 
 /* results */
 .label{display:inline-block;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:#dbeafe;color:#1e3a8a;border-radius:6px;padding:3px 8px;margin-right:6px;vertical-align:2px}
@@ -110,3 +113,10 @@ tbody tr:last-child td{border-bottom:0}
 
 .foot{background:var(--navy);color:#cbd5e1;padding:36px 0}
 .foot-in p{margin:4px 0}.foot .muted{color:#94a3b8}
+
+/* stacked layouts */
+.arch{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:44px;align-items:center}
+.arch>*{min-width:0}
+@media (max-width:1000px){.arch{grid-template-columns:1fr}}
+.paper{max-width:860px}
+.paper .bib{margin-top:8px}

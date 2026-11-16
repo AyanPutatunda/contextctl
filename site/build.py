@@ -75,7 +75,8 @@ def results_rows() -> str:
         ("Identical repeats", "7/7", lambda d: f"{d['repeats']}/{d['repeats']}"
          if d["repeat_digests_identical"] else "no"),
         ("Full bundle / raw tokens", "4.6×", lambda d: f"{d['tokens']['full_bundle_over_raw']}×"),
-        ("Appendix B food_revenue rows", "3 rows", lambda d: _food(d)),
+        ("Appendix B food_revenue rows", "3 rows: 2023-08-30 → 2024-09-12 → 2025-07-01",
+         lambda d: _food(d)),
     ]
     out = []
     for label, paper, fn in rows:
@@ -88,7 +89,7 @@ def _food(d: dict) -> str:
     for h in d.get("example_history", []):
         if h["concept"].endswith("food_revenue.md") and h["field"] == "expr":
             dates = [x["valid_from"][:10] for x in h["rows"]]
-            return f"{len(dates)} rows, " + ", ".join(dates)
+            return f"{len(dates)} rows: " + " → ".join(dates)
     return "n/a"
 
 
