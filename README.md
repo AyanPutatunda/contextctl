@@ -129,7 +129,9 @@ ruff check . && python -m mypy && pytest --cov
 ```
 
 CI (GitHub Actions) runs ruff, mypy and pytest on Python 3.10/3.12/3.13, the
-lifecycle, a deterministic replay, and a site build check. The project website
+lifecycle, a deterministic replay, and a site build check. Pushes to `main` that pass
+then deploy the site to Netlify production (https://contextctl.sh); pull requests get a
+draft deploy. The project website
 lives in [`site/`](site/) (static HTML, `python3 site/build.py`).
 
 ## Data

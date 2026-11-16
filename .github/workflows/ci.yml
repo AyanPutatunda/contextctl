@@ -1,11 +1,16 @@
-name: CI
+name: CI/CD
 
 on:
   push:
+    branches: [main]
   pull_request:
 
 permissions:
   contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   test:
@@ -29,10 +34,7 @@ jobs:
       - name: Typecheck (mypy)
         run: python -m mypy
       - name: Tests (pytest)
-        run: |
-          git config --global user.name ci
-          git config --global user.email ci@example.invalid
-          pytest --cov --cov-report=term --cov-fail-under=90
+        run: pytest --cov --cov-report=term --cov-fail-under=90
       - name: Nine-check lifecycle
         run: contextctl selfcheck
       - name: Replay determinism (synthetic, 3 repeats)
@@ -45,12 +47,63 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build site
+      - name: Build site (production config)
         run: python site/build.py
       - name: Check site output
         run: |
           test -f site/dist/index.html
           test -f site/dist/paper/contextctl_AAIBD2026.pdf
-          grep -q 'noindex' site/dist/index.html
-          grep -q 'Disallow: /' site/dist/robots.txt
+          grep -q 'rel="canonical" href="https://contextctl.sh/"' site/dist/index.html
           ! grep -q '{{' site/dist/index.html
+
+  deploy:
+    needs: [test, site]
+    runs-on: ubuntu-latest
+    # Fork PRs get no secrets; skip them instead of failing.
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
+    environment:
+      name: ${{ github.event_name == 'push' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install Netlify CLI
+        run: npm install -g netlify-cli@17
+      - name: Build site
+        run: |
+          if [ "${{ github.event_name }}" = "push" ]; then
+            python site/build.py                 # production: indexable
+          else
+            INDEXABLE=0 python site/build.py     # PR drafts: noindex
+          fi
+      - name: Deploy to Netlify
+        id: deploy
+        run: |
+          set -euo pipefail
+          MSG="${GITHUB_SHA::7} ${{ github.event_name }}"
+          if [ "${{ github.event_name }}" = "push" ]; then
+            OUT=$(netlify deploy --prod --dir site/dist --site "$NETLIFY_SITE_ID" --message "$MSG" --json)
+            URL=$(echo "$OUT" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("url") or d["deploy_url"])')
+          else
+            OUT=$(netlify deploy --dir site/dist --site "$NETLIFY_SITE_ID" --alias "pr-${{ github.event.number }}" --message "$MSG" --json)
+            URL=$(echo "$OUT" | python3 -c 'import json,sys;print(json.load(sys.stdin)["deploy_url"])')
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "Deployed: $URL" >> "$GITHUB_STEP_SUMMARY"
+      - name: Smoke test production
+        if: github.event_name == 'push'
+        run: |
+          for i in 1 2 3 4 5; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' https://contextctl.netlify.app/) && [ "$code" = 200 ] && break
+            sleep 5
+          done
+          [ "$code" = 200 ]
+          curl -sf https://contextctl.netlify.app/paper/contextctl_AAIBD2026.pdf -o /dev/null

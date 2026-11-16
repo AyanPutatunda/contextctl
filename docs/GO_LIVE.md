@@ -1,5 +1,13 @@
 # Go-live runbook (contextctl.sh)
 
+> **Status, Nov 16, 2026:** the site is in production. Every push to `main` deploys
+> `site/dist` to Netlify production from GitHub Actions (`.github/workflows/ci.yml`,
+> secrets `NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID`); pull requests get a noindex draft
+> deploy. `contextctl.sh` (primary) and `www.contextctl.sh` are attached to the Netlify
+> site and indexing is on. **Still pending:** the Namecheap DNS records below, and
+> making the repo public, which is a separate decision. The remaining steps of
+> `scripts/go-live.sh` (repo visibility) have not been run.
+
 Everything is staged so going public is **one command** plus registrar DNS edits.
 Nothing here has been run. Run it only after Ayan says "go live".
 

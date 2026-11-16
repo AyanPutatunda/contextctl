@@ -7,7 +7,7 @@
 #   1. Makes the GitHub repo public.
 #   2. Flips the site to indexable (removes noindex meta, robots.txt Disallow,
 #      X-Robots-Tag header), marks the repo public on the site, commits, pushes.
-#   3. Builds the site and deploys it to Netlify PRODUCTION.
+#   3. Verifies the production build; CI deploys it to Netlify PRODUCTION on push.
 #   4. Attaches SITE_DOMAIN and www.SITE_DOMAIN as custom domains on the Netlify site.
 #   5. Prints the exact DNS records to set at the registrar (DNS is NOT changed by
 #      this script) and, with --provision-tls, asks Netlify for the TLS certificate
@@ -63,11 +63,11 @@ if ! git diff --quiet -- "$CFG"; then
   git push -q origin HEAD
 fi
 
-echo "==> 3/5 Build and deploy to Netlify production"
+echo "==> 3/5 Production deploy happens in CI (push to main -> netlify deploy --prod)"
 python3 site/build.py
 grep -q 'content="index,follow"' site/dist/index.html
 ! grep -q 'Disallow: /' site/dist/robots.txt
-netlify deploy --prod --dir site/dist --site "$NETLIFY_SITE_ID" --message "go-live $(git rev-parse --short HEAD)"
+echo "    watch: gh run watch -R $GITHUB_REPO \$(gh run list -R $GITHUB_REPO -L1 --json databaseId -q '.[0].databaseId')"
 
 echo "==> 4/5 Attach $SITE_DOMAIN and www.$SITE_DOMAIN to the Netlify site"
 netlify api updateSite --data "{\"site_id\":\"$NETLIFY_SITE_ID\",\"body\":{\"custom_domain\":\"$SITE_DOMAIN\",\"domain_aliases\":[\"www.$SITE_DOMAIN\"]}}" >/dev/null
