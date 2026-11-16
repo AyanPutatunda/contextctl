@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>contextctl: auditable, open-format context infrastructure for AI agents</title>
+<meta name="description" content="contextctl manages AI-agent memory as governed data: markdown concept files, Git as the write gate, content-addressed evidence, and a rebuildable SQLite sidecar with SCD Type 2 history.">
+{{ROBOTS_META}}
+<link rel="canonical" href="{{SITE_URL}}/">
+<meta name="author" content="Ayan Putatunda">
+<meta name="theme-color" content="#0b1220">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="contextctl">
+<meta property="og:title" content="contextctl: agent memory you can audit">
+<meta property="og:description" content="OKF concept files, Git as the write gate, content-addressed evidence and an SCD2 SQLite sidecar. Demo paper, IEEE BigData 2026 (AAI-BD).">
+<meta property="og:url" content="{{SITE_URL}}/">
+<meta property="og:image" content="{{SITE_URL}}/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="contextctl: agent memory you can audit">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="contextctl: agent memory you can audit">
+<meta name="twitter:description" content="Auditable, open-format context infrastructure for AI agents.">
+<meta name="twitter:image" content="{{SITE_URL}}/og.png">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css?v={{ASSET_VERSION}}">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"SoftwareSourceCode","name":"contextctl","description":"Auditable, open-format context infrastructure for AI agents.","url":"{{SITE_URL}}/","codeRepository":"{{REPO_URL}}","programmingLanguage":"Python","license":"https://www.apache.org/licenses/LICENSE-2.0","author":{"@type":"Person","name":"Ayan Putatunda"}}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav" id="top">
+  <div class="wrap nav-in">
+    <a class="brand" href="#top" aria-label="contextctl home"><svg class="mark" aria-hidden="true" viewBox="0 0 64 64" width="26" height="26"><rect width="64" height="64" rx="14" fill="#5eead4"/><path d="M18 22h28M18 32h20M18 42h28" stroke="#0b1220" stroke-width="5" stroke-linecap="round"/></svg>contextctl</a>
+    <nav aria-label="Primary">
+      <ul>
+        <li><a href="#problem">Problem</a></li>
+        <li><a href="#architecture">Architecture</a></li>
+        <li><a href="#reconciliation">Reconciliation</a></li>
+        <li><a href="#time">As-of reads</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#quickstart">Quickstart</a></li>
+        <li><a href="#paper">Paper</a></li>
+      </ul>
+    </nav>
+    <a class="btn btn-ghost nav-cta" href="{{REPO_URL}}" rel="noopener">GitHub</a>
+  </div>
+</header>
+
+<main id="main">
+<section class="hero">
+  <div class="wrap hero-in">
+    <p class="eyebrow">Demo paper · IEEE BigData 2026 · AAI-BD workshop</p>
+    <h1>Agent memory you can <span class="hl">audit</span>.</h1>
+    <p class="lede">contextctl manages what AI agents remember as governed data: markdown concept files in an open format, Git as the write gate and the transaction-time record, a content-addressed evidence folder, and a rebuildable SQLite sidecar with SCD Type&nbsp;2 history.</p>
+    <div class="cta">
+      <a class="btn btn-primary" href="/paper/contextctl_AAIBD2026.pdf">Read the paper (PDF)</a>
+      <a class="btn btn-light" href="#quickstart">Quickstart</a>
+      <a class="btn btn-ghost-light" href="{{REPO_URL}}" rel="noopener">Source on GitHub{{REPO_NOTE}}</a>
+    </div>
+    <pre class="hero-code" aria-label="Example session"><code><span class="c">$</span> contextctl curate                <span class="m"># validate + reconcile staged drafts</span>
+<span class="c">$</span> contextctl review approve ID --resolve '{"expr": "is true"}'
+<span class="c">$</span> contextctl merge                 <span class="m"># git merge --no-ff = one snapshot</span>
+<span class="c">$</span> contextctl history concepts/measures/food_revenue.md \
+    --field expr --valid-at 2024-06-01
+<span class="o">"case when is_food_item = 1 then product_price else 0 end"</span></code></pre>
+  </div>
+</section>
+
+<section id="problem" class="sec">
+  <div class="wrap">
+    <h2>The problem</h2>
+    <p class="intro">During a migration, an incident-response agent learns that a critical pipeline belongs to an engineer who has left, and routes alerts to nobody for three weeks. Operators cannot say when it learned this, from what source, what it believed before, or how to restore the correct state with proof.</p>
+    <p>Common memory services keep facts in vendor schemas, keep no content-hash link to the source, and accept agent writes without review. contextctl targets four properties together:</p>
+    <ol class="grid4">
+      <li><strong>Custody</strong><span>of the source bytes behind each belief, by SHA-256.</span></li>
+      <li><strong>Authorization</strong><span>an explicit review step before machine-written knowledge becomes trusted.</span></li>
+      <li><strong>Reconstruction</strong><span>of what was believed, and when, on two time axes.</span></li>
+      <li><strong>Minimal context</strong><span>serving only what a task needs, by progressive disclosure.</span></li>
+    </ol>
+    <p class="muted small">No single mechanism is new; the combination is the point.</p>
+  </div>
+</section>
+
+<section id="architecture" class="sec alt">
+  <div class="wrap two">
+    <div>
+      <h2>Four layers, one job each</h2>
+      <p>Generation is untrusted. Curation is the only path into trusted state. The sidecar is a cache you can delete and rebuild. Serving may only <em>propose</em> writes, which re-enter staging.</p>
+      <dl class="defs">
+        <dt>Evidence object</dt>
+        <dd>Connectors store the raw bytes at <code>evidence/&lt;h&gt;</code>, where <code>h</code> is the SHA-256 of those bytes only. A retried fetch is idempotent; an edited source becomes a new object and the old one is kept.</dd>
+        <dt>OKF-MEM header</dt>
+        <dd>Concepts are markdown files in the Open Knowledge Format with memory fields: <code>actor</code>, <code>evidence</code>, <code>sources</code>, <code>confidence</code>, <code>supersedes</code>, and validity dates.</dd>
+        <dt>Write gate</dt>
+        <dd>Admission is a <code>git merge --no-ff</code> into main. Every merge is a snapshot: the transaction-time record.</dd>
+      </dl>
+    </div>
+    <figure class="figure">
+      <img src="/architecture.svg" width="760" height="470" alt="Four stacked layers: 1 Generation (untrusted), 2 Curation (trust boundary), 3 Metadata (derived SQLite sidecar), 4 Serving (propose only). Arrows go up from layer to layer; a dashed arrow from Serving returns proposals to staging.">
+      <figcaption>Trusted state is layer 2: OKF files, Git history and the evidence folder. Layer 3 can be deleted and rebuilt.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="reconciliation" class="sec">
+  <div class="wrap">
+    <h2>Reconciliation: dedupe before a human sees it</h2>
+    <p class="intro">Each draft is compared with the top-10 full-text matches and the same-path concept, using TF-IDF cosine similarity and the <em>fact</em> fields both assert with different values. Provenance fields never raise a conflict. The first matching rule applies.</p>
+    <div class="rules" role="list">
+      <div class="rule r-conf" role="listitem"><span class="pill">1 · Conflict</span><p class="cond">a fact field differs from the same-path concept</p><p>Show both values; a human resolves; <code>supersedes</code> is recorded.</p></div>
+      <div class="rule r-dup" role="listitem"><span class="pill">2 · Duplicate</span><p class="cond">max sim ≥ 0.9 and no new facts</p><p>Drop the draft and log the match.</p></div>
+      <div class="rule r-rev" role="listitem"><span class="pill">3 · Revision</span><p class="cond">0.5 ≤ max sim &lt; 0.9</p><p>Rewrite as an edit of the best match.</p></div>
+      <div class="rule r-new" role="listitem"><span class="pill">4 · New</span><p class="cond">max sim &lt; 0.5</p><p>Add as a new concept.</p></div>
+    </div>
+    <p class="muted small">A Duplicate or Revision whose best match is a <em>different</em> concept (a rename or a sibling) is held for review rather than applied.</p>
+  </div>
+</section>
+
+<section id="time" class="sec alt">
+  <div class="wrap two">
+    <div>
+      <h2>As-of reads on two time axes</h2>
+      <p>A post-merge hook maintains one SQLite file: an SCD Type&nbsp;2 <code>belief_history</code> table over header fields and a body digest, an FTS5 index and a link table. <strong>Valid time</strong> comes from headers; <strong>transaction time</strong> comes from Git.</p>
+      <p>“What was the expression on <em>t</em>?” is one range query:</p>
+      <pre class="code"><code>SELECT new_value FROM belief_history
+ WHERE concept = :c AND field = 'expr'
+   AND valid_from &lt;= :t
+   AND (valid_to IS NULL OR valid_to &gt; :t);</code></pre>
+      <p>“What did the bundle say then?” is an as-of read at that snapshot: <code>contextctl read PATH --as-of 2024-08-01</code>. With a retroactive <code>valid_from</code>, the two answers differ exactly over the period in which the agent was wrong.</p>
+    </div>
+    <div>
+      <div class="table-wrap">
+      <table>
+        <caption>Worked example: the <code>food_revenue</code> expression (paper, Appendix B)</caption>
+        <thead><tr><th scope="col">old</th><th scope="col">new</th><th scope="col">valid_from</th><th scope="col">valid_to</th></tr></thead>
+        <tbody>
+          <tr><td>–</td><td><code>= 1</code></td><td>2023-08-30</td><td>2024-09-12</td></tr>
+          <tr><td><code>= 1</code></td><td><code>is true</code></td><td>2024-09-12</td><td>2025-07-01</td></tr>
+          <tr><td><code>is true</code></td><td>bare boolean</td><td>2025-07-01</td><td>open</td></tr>
+        </tbody>
+      </table>
+      </div>
+      <p class="muted small">The standing test: delete the sidecar, rebuild it from Git, and compare a canonical row dump.</p>
+    </div>
+  </div>
+</section>
+
+<section id="results" class="sec">
+  <div class="wrap">
+    <h2>Results</h2>
+    <p class="intro"><span class="label">Measured in the paper</span> on the built core with no language model: storage, versioning, indexing and the gate. They show the substrate works; they are not evidence for accuracy, token savings or the proposed integrity properties.</p>
+    <div class="stats">
+      <div class="stat"><span class="num">373</span><span class="lbl">drafts replayed from the public dbt Jaffle Shop history</span></div>
+      <div class="stat"><span class="num">322</span><span class="lbl">classified Duplicate (16 New, 24 Revision, 11 Conflict)</span></div>
+      <div class="stat"><span class="num">665/665</span><span class="lbl">as-of reads matched <code>git show</code></span></div>
+      <div class="stat"><span class="num">155 ms</span><span class="lbl">snapshot commit at 10<sup>4</sup> concepts (634 ms at 10<sup>5</sup>)</span></div>
+      <div class="stat"><span class="num">&lt; 1 s</span><span class="lbl">full sidecar rebuild; sub-ms point-in-time queries</span></div>
+      <div class="stat"><span class="num">9/9</span><span class="lbl">no-model lifecycle checks passed; rebuild matched row for row</span></div>
+    </div>
+    <h3>What the replay taught us</h3>
+    <ul class="findings">
+      <li><strong>(a)</strong> Checking Conflict against every candidate flagged 359 of 373 drafts, so Conflict is scoped to the same path.</li>
+      <li><strong>(b)</strong> A coordinated header-and-blob rewrite passed the digest check and showed only as an uncommitted Git change.</li>
+      <li><strong>(c)</strong> The full governed bundle cost about 4.6× the tokens of the raw sources: digests and URIs tokenize poorly.</li>
+      <li><strong>(d)</strong> Reverting one merge conflicted with a later merge of the same files.</li>
+    </ul>
+    <h3>Reproduced with this repository</h3>
+    <p><span class="label label-alt">Reproduced (this implementation)</span> A clean re-implementation from the paper's text, re-run on a fully synthetic project and on the same public dbt history. Counts differ from the paper because the harvester's scope is our reading of the text; the checks and the worked example match.</p>
+    <div class="table-wrap">
+    <table class="results">
+      <thead><tr><th scope="col">Metric</th><th scope="col">Paper</th><th scope="col">Synthetic replay</th><th scope="col">Public dbt replay</th></tr></thead>
+      <tbody>
+{{RESULTS_ROWS}}
+      </tbody>
+    </table>
+    </div>
+    <p class="muted small">Every number in this table comes from <code>examples/reproduce_paper.py</code> (results in <code>examples/results/</code>). Timings depend on hardware.</p>
+  </div>
+</section>
+
+<section id="quickstart" class="sec alt">
+  <div class="wrap two">
+    <div>
+      <h2>Quickstart</h2>
+      <p>Python 3.10+, Git and SQLite (with FTS5, standard in CPython). No services and nothing paid.</p>
+      <pre class="code"><code>git clone {{REPO_URL}}.git
+cd contextctl
+python -m venv .venv &amp;&amp; . .venv/bin/activate
+pip install -e '.[tokens]'
+
+contextctl selfcheck          # nine-check lifecycle
+bash examples/quickstart.sh   # four layers on synthetic notes
+contextctl replay --repeats 3 # replay harness, deterministic</code></pre>
+      <p class="muted small">{{REPO_ACCESS}}</p>
+    </div>
+    <div>
+      <h3>Day-to-day CLI</h3>
+      <pre class="code"><code>contextctl init
+contextctl ingest notes/            # generation (untrusted)
+contextctl curate                   # validate + reconcile
+contextctl review list
+contextctl review approve ID [--resolve '{...}']
+contextctl merge                    # git merge --no-ff
+contextctl orient | search Q | read PATH [--as-of T]
+contextctl history PATH --field F --valid-at T
+contextctl provenance PATH          # concept→commit→evidence→source
+contextctl sidecar check            # delete + rebuild + compare</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="paper" class="sec">
+  <div class="wrap two">
+    <div>
+      <h2>Paper</h2>
+      <p class="paper-title">contextctl: Auditable, Open-Format Context Infrastructure for AI Agents</p>
+      <p>Demo paper, AAI-BD workshop at the 2026 IEEE International Conference on Big Data (BigData 2026).</p>
+      <p class="abstract">AI agents act on remembered facts, yet common memory services keep those facts in vendor schemas, keep no content-hash link to the source, and accept agent writes without review. We demonstrate contextctl, which manages agent context as governed data: markdown concept files in the Open Knowledge Format (OKF), Git as write gate and transaction-time record, a content-addressed evidence folder, and a rebuildable SQLite sidecar holding SCD Type 2 history. The demo runs the storage, versioning, indexing, and a minimal review gate with no language model, including a replay of a public dbt project's history.</p>
+      <p><a class="btn btn-primary" href="/paper/contextctl_AAIBD2026.pdf">Download PDF</a></p>
+    </div>
+    <div>
+      <h3 id="bibtex-h">Cite</h3>
+      <div class="bib">
+        <button class="copy" type="button" data-copy="bibtex" aria-describedby="bibtex-h">Copy BibTeX</button>
+        <pre class="code" id="bibtex"><code>{{BIBTEX}}</code></pre>
+      </div>
+      <p class="muted small" aria-live="polite" id="copy-status"></p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-in">
+    <p><strong>contextctl</strong> by Ayan Putatunda. Code under Apache-2.0.</p>
+    <p class="muted small">Examples and demo data on this site are synthetic or from the public dbt Jaffle Shop project.</p>
+  </div>
+</footer>
+<script>
+document.querySelectorAll('button.copy').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var t = document.getElementById(b.dataset.copy).innerText;
+    var s = document.getElementById('copy-status');
+    (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(
+      function () { s.textContent = 'BibTeX copied.'; },
+      function () { s.textContent = 'Select the text to copy.'; });
+  });
+});
+</script>
+</body>
+</html>

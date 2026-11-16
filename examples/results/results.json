@@ -1,0 +1,386 @@
+{
+  "bench": [
+    {
+      "asof_read_ms": 2.82,
+      "concepts": 100,
+      "revert_ms": 4.23,
+      "sidecar_rebuild_ms": 137.64,
+      "snapshot_commit_ms": 6.61,
+      "valid_time_query_ms": 0.01
+    },
+    {
+      "asof_read_ms": 2.83,
+      "concepts": 1000,
+      "revert_ms": 13.6,
+      "sidecar_rebuild_ms": 359.26,
+      "snapshot_commit_ms": 24.97,
+      "valid_time_query_ms": 0.01
+    },
+    {
+      "asof_read_ms": 4.44,
+      "concepts": 10000,
+      "revert_ms": 39.16,
+      "sidecar_rebuild_ms": 1955.03,
+      "snapshot_commit_ms": 56.54,
+      "valid_time_query_ms": 0.01
+    }
+  ],
+  "environment": {
+    "git": "git version 2.47.3",
+    "platform": "Linux-6.12.113+-x86_64-with-glibc2.41",
+    "python": "3.13.5",
+    "sqlite": "3.46.1",
+    "tokenizer_exact": true
+  },
+  "lifecycle": [
+    {
+      "name": "evidence put is idempotent (content addressing)",
+      "ok": true
+    },
+    {
+      "name": "propose writes staging only",
+      "ok": true
+    },
+    {
+      "name": "gate rejects unverifiable evidence digest",
+      "ok": true
+    },
+    {
+      "name": "New draft admitted through review and merge",
+      "ok": true
+    },
+    {
+      "name": "Duplicate draft dropped and logged",
+      "ok": true
+    },
+    {
+      "name": "Conflict held, resolved, supersedes recorded",
+      "ok": true
+    },
+    {
+      "name": "as-of read (transaction time) returns prior version",
+      "ok": true
+    },
+    {
+      "name": "valid-time query and provenance chain resolve",
+      "ok": true
+    },
+    {
+      "name": "sidecar delete + rebuild matches row for row",
+      "ok": true
+    }
+  ],
+  "replay_public_dbt": {
+    "asof_checks": 302,
+    "asof_matches": 302,
+    "bundle_head": "58e095f",
+    "counts": {
+      "Conflict": 13,
+      "Duplicate": 707,
+      "New": 35,
+      "Revision": 9
+    },
+    "determinism_digest": "fb03d1afae79763f9f80af007faf7e34e99a1a10429a1e1735bd9a7d2c2dc535",
+    "drafts": 764,
+    "example_history": [
+      {
+        "concept": "concepts/measures/drink_revenue.md",
+        "field": "expr",
+        "rows": [
+          {
+            "new": "case when is_drink_item = 1 then product_price else 0 end",
+            "old": null,
+            "snapshot": "b15bfd7",
+            "valid_from": "2023-08-30T23:34:22Z",
+            "valid_to": "2024-09-12T14:40:29Z"
+          },
+          {
+            "new": "case when is_drink_item is true then product_price else 0 end",
+            "old": "case when is_drink_item = 1 then product_price else 0 end",
+            "snapshot": "a2c8db0",
+            "valid_from": "2024-09-12T14:40:29Z",
+            "valid_to": "2025-07-01T14:24:27Z"
+          },
+          {
+            "new": "case when is_drink_item then product_price else 0 end",
+            "old": "case when is_drink_item is true then product_price else 0 end",
+            "snapshot": "58e095f",
+            "valid_from": "2025-07-01T14:24:27Z",
+            "valid_to": null
+          }
+        ]
+      },
+      {
+        "concept": "concepts/measures/food_revenue.md",
+        "field": "expr",
+        "rows": [
+          {
+            "new": "case when is_food_item = 1 then product_price else 0 end",
+            "old": null,
+            "snapshot": "b15bfd7",
+            "valid_from": "2023-08-30T23:34:22Z",
+            "valid_to": "2024-09-12T14:40:29Z"
+          },
+          {
+            "new": "case when is_food_item is true then product_price else 0 end",
+            "old": "case when is_food_item = 1 then product_price else 0 end",
+            "snapshot": "a2c8db0",
+            "valid_from": "2024-09-12T14:40:29Z",
+            "valid_to": "2025-07-01T14:24:27Z"
+          },
+          {
+            "new": "case when is_food_item then product_price else 0 end",
+            "old": "case when is_food_item is true then product_price else 0 end",
+            "snapshot": "58e095f",
+            "valid_from": "2025-07-01T14:24:27Z",
+            "valid_to": null
+          }
+        ]
+      },
+      {
+        "concept": "concepts/semantic_models/customers.md",
+        "field": "measures",
+        "rows": [
+          {
+            "new": [
+              "count_lifetime_orders agg=sum",
+              "lifetime_spend_pretax agg=sum",
+              "lifetime_spend agg=sum"
+            ],
+            "old": null,
+            "snapshot": "b15bfd7",
+            "valid_from": "2023-08-30T23:34:22Z",
+            "valid_to": "2024-04-04T20:50:59Z"
+          },
+          {
+            "new": [
+              "customers agg=count_distinct",
+              "count_lifetime_orders agg=sum",
+              "lifetime_spend_pretax agg=sum",
+              "lifetime_spend agg=sum"
+            ],
+            "old": [
+              "count_lifetime_orders agg=sum",
+              "lifetime_spend_pretax agg=sum",
+              "lifetime_spend agg=sum"
+            ],
+            "snapshot": "04c0fa0",
+            "valid_from": "2024-04-04T20:50:59Z",
+            "valid_to": "2025-07-01T14:24:27Z"
+          },
+          {
+            "new": [
+              "customers expr=customer_id agg=count_distinct",
+              "count_lifetime_orders agg=sum",
+              "lifetime_spend_pretax agg=sum",
+              "lifetime_spend agg=sum"
+            ],
+            "old": [
+              "customers agg=count_distinct",
+              "count_lifetime_orders agg=sum",
+              "lifetime_spend_pretax agg=sum",
+              "lifetime_spend agg=sum"
+            ],
+            "snapshot": "58e095f",
+            "valid_from": "2025-07-01T14:24:27Z",
+            "valid_to": null
+          }
+        ]
+      }
+    ],
+    "final_concepts": 43,
+    "held": 19,
+    "merges": 8,
+    "rebuild_matches": true,
+    "rejected_invalid": 0,
+    "repeat_digests_identical": true,
+    "repeats": 7,
+    "sidecar_digest": "7126bbbd3cedb268",
+    "sidecar_tx_checks": 302,
+    "sidecar_tx_matches": 302,
+    "source": "https://github.com/dbt-labs/jaffle-shop",
+    "source_head": "7be2c58",
+    "steps": 23,
+    "tokens": {
+      "body_only_read": 15,
+      "full_bundle": 9061,
+      "full_bundle_over_raw": 1.9,
+      "full_concept_read": 268,
+      "orient_search_read": 1517,
+      "orient_search_read_body_only": 1264,
+      "raw_sources": 4776,
+      "target": "concepts/semantic_models/locations.md",
+      "tokenizer": "tiktoken cl100k_base"
+    }
+  },
+  "replay_synthetic": {
+    "asof_checks": 362,
+    "asof_matches": 362,
+    "bundle_head": "62f0fed",
+    "counts": {
+      "Conflict": 15,
+      "Duplicate": 488,
+      "New": 21,
+      "Revision": 7
+    },
+    "determinism_digest": "09da6a9d6476a28befe327c4b747c2ae1d6cd2eed4f1036acf1cf37a12b9ba57",
+    "drafts": 531,
+    "example_history": [
+      {
+        "concept": "concepts/semantic_models/order_items.md",
+        "field": "measures",
+        "rows": [
+          {
+            "new": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item = 1 then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
+            ],
+            "old": null,
+            "snapshot": "4f01f2d",
+            "valid_from": "2023-08-30T16:00:00Z",
+            "valid_to": "2024-09-12T20:00:00Z"
+          },
+          {
+            "new": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item is true then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
+            ],
+            "old": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item = 1 then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
+            ],
+            "snapshot": "ffa89c3",
+            "valid_from": "2024-09-12T20:00:00Z",
+            "valid_to": "2024-09-30T16:00:00Z"
+          },
+          {
+            "new": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item is true then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item is true then product_price else 0 end agg=sum"
+            ],
+            "old": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item is true then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
+            ],
+            "snapshot": "746d5e9",
+            "valid_from": "2024-09-30T16:00:00Z",
+            "valid_to": "2025-07-01T19:00:00Z"
+          },
+          {
+            "new": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item is true then product_price else 0 end agg=sum"
+            ],
+            "old": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item is true then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item is true then product_price else 0 end agg=sum"
+            ],
+            "snapshot": "ca9fe43",
+            "valid_from": "2025-07-01T19:00:00Z",
+            "valid_to": "2025-07-15T16:00:00Z"
+          },
+          {
+            "new": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item then product_price else 0 end agg=sum"
+            ],
+            "old": [
+              "revenue expr=product_price agg=sum",
+              "food_revenue expr=case when is_food_item then product_price else 0 end agg=sum",
+              "drink_revenue expr=case when is_drink_item is true then product_price else 0 end agg=sum"
+            ],
+            "snapshot": "5315f7d",
+            "valid_from": "2025-07-15T16:00:00Z",
+            "valid_to": null
+          }
+        ]
+      },
+      {
+        "concept": "concepts/measures/drink_revenue.md",
+        "field": "expr",
+        "rows": [
+          {
+            "new": "case when is_drink_item = 1 then product_price else 0 end",
+            "old": null,
+            "snapshot": "4f01f2d",
+            "valid_from": "2023-08-30T16:00:00Z",
+            "valid_to": "2024-09-30T16:00:00Z"
+          },
+          {
+            "new": "case when is_drink_item is true then product_price else 0 end",
+            "old": "case when is_drink_item = 1 then product_price else 0 end",
+            "snapshot": "746d5e9",
+            "valid_from": "2024-09-30T16:00:00Z",
+            "valid_to": "2025-07-15T16:00:00Z"
+          },
+          {
+            "new": "case when is_drink_item then product_price else 0 end",
+            "old": "case when is_drink_item is true then product_price else 0 end",
+            "snapshot": "5315f7d",
+            "valid_from": "2025-07-15T16:00:00Z",
+            "valid_to": null
+          }
+        ]
+      },
+      {
+        "concept": "concepts/measures/food_revenue.md",
+        "field": "expr",
+        "rows": [
+          {
+            "new": "case when is_food_item = 1 then product_price else 0 end",
+            "old": null,
+            "snapshot": "4f01f2d",
+            "valid_from": "2023-08-30T16:00:00Z",
+            "valid_to": "2024-09-12T20:00:00Z"
+          },
+          {
+            "new": "case when is_food_item is true then product_price else 0 end",
+            "old": "case when is_food_item = 1 then product_price else 0 end",
+            "snapshot": "ffa89c3",
+            "valid_from": "2024-09-12T20:00:00Z",
+            "valid_to": "2025-07-01T19:00:00Z"
+          },
+          {
+            "new": "case when is_food_item then product_price else 0 end",
+            "old": "case when is_food_item is true then product_price else 0 end",
+            "snapshot": "ca9fe43",
+            "valid_from": "2025-07-01T19:00:00Z",
+            "valid_to": null
+          }
+        ]
+      }
+    ],
+    "final_concepts": 25,
+    "held": 12,
+    "merges": 17,
+    "rebuild_matches": true,
+    "rejected_invalid": 0,
+    "repeat_digests_identical": true,
+    "repeats": 7,
+    "sidecar_digest": "83890788e1b1d185",
+    "sidecar_tx_checks": 362,
+    "sidecar_tx_matches": 362,
+    "source": "synthetic:synthetic-beans",
+    "source_head": "a3c9a2d",
+    "steps": 25,
+    "tokens": {
+      "body_only_read": 25,
+      "full_bundle": 5191,
+      "full_bundle_over_raw": 4.09,
+      "full_concept_read": 332,
+      "orient_search_read": 1238,
+      "orient_search_read_body_only": 931,
+      "raw_sources": 1269,
+      "target": "concepts/semantic_models/order_items.md",
+      "tokenizer": "tiktoken cl100k_base"
+    }
+  }
+}

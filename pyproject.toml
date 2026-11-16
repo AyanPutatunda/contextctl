@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "contextctl"
+version = "0.1.0"
+description = "Auditable, open-format context infrastructure for AI agents: OKF concept files, Git as write gate, content-addressed evidence, and an SCD Type 2 SQLite sidecar."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+authors = [{ name = "Ayan Putatunda" }, { name = "Suhas Jangoan" }]
+requires-python = ">=3.10"
+dependencies = ["PyYAML>=6.0"]
+keywords = ["agent memory", "data provenance", "bitemporal", "SCD2", "git", "governance"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: Apache Software License",
+  "Topic :: Database",
+]
+
+[project.optional-dependencies]
+tokens = ["tiktoken>=0.7"]
+dev = ["pytest>=8", "pytest-cov>=5", "hypothesis>=6.100", "ruff>=0.6", "mypy>=1.10", "types-PyYAML"]
+
+[project.scripts]
+contextctl = "contextctl.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+contextctl = ["py.typed"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = ["site", "paper"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+files = ["src/contextctl"]
+
+[[tool.mypy.overrides]]
+module = ["tiktoken"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::ResourceWarning"]
+
+[tool.coverage.run]
+source = ["contextctl"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true

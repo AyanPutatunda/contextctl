@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 470" role="img" aria-labelledby="arch-title arch-desc" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <title id="arch-title">contextctl four-layer architecture</title>
+  <desc id="arch-desc">Four stacked layers. Layer 1 Generation is untrusted: connectors fetch evidence and draft files. Layer 2 Curation is the trust boundary: validate, reconcile, review, merge; it holds OKF files, Git history and the evidence folder. Layer 3 Metadata is derived: a SQLite sidecar with SCD2 history, full-text search and links that can be deleted and rebuilt. Layer 4 Serving offers progressive disclosure and may only propose writes, which re-enter staging.</desc>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5b6b82"/></marker>
+  </defs>
+  <style>
+    .t{font-size:17px;font-weight:700;fill:#0f172a}
+    .s{font-size:13.5px;fill:#334155}
+    .n{font-size:12px;font-weight:700;fill:#ffffff}
+    .tag{font-size:11.5px;font-weight:700;letter-spacing:.06em}
+  </style>
+  <!-- layer 4 -->
+  <rect x="60" y="20" width="560" height="78" rx="12" fill="#e7f7ef" stroke="#3aa76d" stroke-width="1.5"/>
+  <circle cx="92" cy="59" r="15" fill="#3aa76d"/><text x="92" y="63.5" text-anchor="middle" class="n">4</text>
+  <text x="120" y="52" class="t">Serving</text>
+  <text x="120" y="75" class="s">orient → search → read → history → provenance; propose only</text>
+  <!-- layer 3 -->
+  <rect x="60" y="128" width="560" height="78" rx="12" fill="#fff7db" stroke="#c99a12" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <circle cx="92" cy="167" r="15" fill="#c99a12"/><text x="92" y="171.5" text-anchor="middle" class="n">3</text>
+  <text x="120" y="160" class="t">Metadata (derived)</text>
+  <text x="120" y="183" class="s">SQLite sidecar: SCD2 belief_history, FTS5 search, links</text>
+  <!-- layer 2 -->
+  <rect x="60" y="236" width="560" height="96" rx="12" fill="#e8efff" stroke="#3b63d6" stroke-width="2.5"/>
+  <circle cx="92" cy="284" r="15" fill="#3b63d6"/><text x="92" y="288.5" text-anchor="middle" class="n">2</text>
+  <text x="120" y="270" class="t">Curation (trust boundary)</text>
+  <text x="120" y="293" class="s">validate → reconcile → review → merge (git --no-ff)</text>
+  <text x="120" y="315" class="s">Trusted state: OKF concept files · Git history · evidence/&lt;sha256&gt;</text>
+  <!-- layer 1 -->
+  <rect x="60" y="362" width="560" height="78" rx="12" fill="#fdeee4" stroke="#d9713a" stroke-width="1.5"/>
+  <circle cx="92" cy="401" r="15" fill="#d9713a"/><text x="92" y="405.5" text-anchor="middle" class="n">1</text>
+  <text x="120" y="394" class="t">Generation (untrusted)</text>
+  <text x="120" y="417" class="s">connectors fetch evidence bytes and draft concept files</text>
+  <!-- arrows up -->
+  <line x1="340" y1="362" x2="340" y2="336" stroke="#5b6b82" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="340" y1="236" x2="340" y2="210" stroke="#5b6b82" stroke-width="2" marker-end="url(#ah)"/>
+  <line x1="340" y1="128" x2="340" y2="102" stroke="#5b6b82" stroke-width="2" marker-end="url(#ah)"/>
+  <!-- propose loop -->
+  <path d="M620 59 C 700 59, 700 401, 624 401" fill="none" stroke="#3aa76d" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+  <text x="706" y="226" class="tag" fill="#2f8a5a" transform="rotate(90 706 226)" text-anchor="middle">PROPOSE → STAGING</text>
+  <!-- rebuild tag -->
+  <text x="606" y="150" class="tag" fill="#9a7510" text-anchor="end">DELETE &amp; REBUILD</text>
+  <text x="606" y="258" class="tag" fill="#2f4fb0" text-anchor="end">ONLY PATH TO TRUST</text>
+</svg>

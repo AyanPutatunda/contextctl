@@ -1,0 +1,7 @@
+{
+  "SITE_DOMAIN": "contextctl.sh",
+  "REPO_URL": "https://github.com/AyanPutatunda/contextctl",
+  "REPO_PUBLIC": false,
+  "INDEXABLE": false,
+  "NETLIFY_SITE_NAME": "contextctl"
+}

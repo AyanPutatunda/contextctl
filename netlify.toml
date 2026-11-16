@@ -1,0 +1,17 @@
+# Netlify config for the contextctl site. The site is plain static HTML built by
+# site/build.py (Python 3, no dependencies). Domain and indexing are controlled by
+# site/site.config.json (SITE_DOMAIN, INDEXABLE) or the same-named env variables.
+[build]
+  command = "python3 site/build.py"
+  publish = "site/dist"
+
+[build.environment]
+  PYTHON_VERSION = "3.12"
+
+# Previews and branch deploys are never indexable, even after go-live.
+[context.deploy-preview.environment]
+  INDEXABLE = "0"
+[context.branch-deploy.environment]
+  INDEXABLE = "0"
+
+# www -> apex is handled by Netlify once both domains are attached (primary = apex).
