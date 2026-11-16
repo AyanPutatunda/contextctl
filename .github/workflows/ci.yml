@@ -102,8 +102,8 @@ jobs:
         if: github.event_name == 'push'
         run: |
           for i in 1 2 3 4 5; do
-            code=$(curl -s -o /dev/null -w '%{http_code}' https://contextctl.netlify.app/) && [ "$code" = 200 ] && break
+            code=$(curl -sL -o /dev/null -w '%{http_code}' https://contextctl.netlify.app/) && [ "$code" = 200 ] && break
             sleep 5
           done
           [ "$code" = 200 ]
-          curl -sf https://contextctl.netlify.app/paper/contextctl_AAIBD2026.pdf -o /dev/null
+          curl -sfL https://contextctl.netlify.app/paper/contextctl_AAIBD2026.pdf -o /dev/null
