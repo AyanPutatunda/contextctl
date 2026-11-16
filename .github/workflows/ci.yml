@@ -90,12 +90,19 @@ jobs:
           set -euo pipefail
           MSG="${GITHUB_SHA::7} ${{ github.event_name }}"
           if [ "${{ github.event_name }}" = "push" ]; then
-            OUT=$(netlify deploy --prod --dir site/dist --site "$NETLIFY_SITE_ID" --message "$MSG" --json)
-            URL=$(echo "$OUT" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("url") or d["deploy_url"])')
+            ARGS=(--prod)
           else
-            OUT=$(netlify deploy --dir site/dist --site "$NETLIFY_SITE_ID" --alias "pr-${{ github.event.number }}" --message "$MSG" --json)
-            URL=$(echo "$OUT" | python3 -c 'import json,sys;print(json.load(sys.stdin)["deploy_url"])')
+            ARGS=(--alias "pr-${{ github.event.number }}")
           fi
+          # The Netlify API occasionally returns a transient "Site not found"; retry.
+          for attempt in 1 2 3; do
+            if OUT=$(netlify deploy "${ARGS[@]}" --dir site/dist --site "$NETLIFY_SITE_ID" --message "$MSG" --json); then
+              break
+            fi
+            [ "$attempt" = 3 ] && exit 1
+            echo "deploy attempt $attempt failed; retrying in 15s"; sleep 15
+          done
+          URL=$(echo "$OUT" | python3 -c 'import json,sys;d=json.load(sys.stdin);print(d.get("url") if "--prod" in sys.argv else d["deploy_url"])' "${ARGS[0]}")
           echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "Deployed: $URL" >> "$GITHUB_STEP_SUMMARY"
       - name: Smoke test production
