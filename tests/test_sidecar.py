@@ -136,3 +136,55 @@ def test_removed_field_writes_tombstone(gate, bundle):
     assert "supersedes" not in got and got["owner"] == "ana"
     assert gate.sidecar.fields_as_of_tx(p, seq - 1)["supersedes"] == [{"snapshot": "abc"}]
     assert gate.sidecar.value_at(p, "supersedes", "2024-06-01") is None
+
+
+def _admit_now(gate, c):
+    """Propose, curate, approve and merge with the wall clock (no ``when``)."""
+    did = gate.propose(c)
+    rec = gate.curate([did])[0]
+    if rec.status == "pending":  # a held sibling match is admitted at its own path
+        gate.approve(did, "reviewer", as_new=bool(rec.reconciliation["held"]))
+    return gate.merge(f"admit {c.path}", who=WHO)
+
+
+def test_same_second_valid_at_and_as_of_tight_loop(gate, bundle):
+    """Regression: two merges in the same wall-clock second shared a one-second
+    transaction time, so a time read between them (truncated to the second, as
+    `date -u +%FT%TZ` does) answered with the later value. Tight loop, no
+    sleeps in the test."""
+    import datetime as dt
+
+    server = Server(bundle, gate.sidecar)
+    for i in range(4):
+        p = f"concepts/notes/owner-{i}.md"
+        body = f"{['Payments', 'Billing', 'Search', 'Ledger'][i]} pipeline owner.\n"
+        _admit_now(gate, concept(p, body, title=f"pipeline {i}", owner="alex"))
+        t1 = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        _admit_now(gate, concept(p, body, title=f"pipeline {i}", owner="blair"))
+        assert gate.sidecar.value_at(p, "owner", t1) == "alex"
+        assert "owner: alex" in (server.read(p, as_of=t1) or "")
+        assert gate.sidecar.value_at(p, "owner", "2999-01-01") == "blair"
+        rows = gate.sidecar.history(p, "owner")
+        assert [r.new_value for r in rows] == ["alex", "blair"]
+        assert rows[0].valid_from < rows[0].valid_to == rows[1].valid_from  # no zero-length row
+    times = [bundle.git.commit_time(s) for s in bundle.git.first_parent_log(bundle.main)[1:]]
+    assert times == sorted(times) and len(set(times)) == len(times)  # strictly increasing
+    fresh = Sidecar(bundle, bundle.root / "rebuilt.sqlite")
+    fresh.rebuild()
+    assert fresh.canonical_dump() == gate.sidecar.canonical_dump()
+    fresh.close()
+
+
+def test_explicit_tied_times_are_made_monotonic(gate, bundle):
+    p = "concepts/x.md"
+    t = "2024-05-01T10:00:00Z"
+    admit(gate, concept(p, "b\n", title="x", owner="alex"), t)
+    admit(gate, concept(p, "b\n", title="x", owner="blair"), t)  # same explicit second
+    rows = gate.sidecar.history(p, "owner")
+    assert rows[1].valid_from == "2024-05-01T10:00:01Z"
+    assert gate.sidecar.value_at(p, "owner", t) == "alex"
+    assert gate.sidecar.value_at(p, "owner", "2024-05-01T10:00:01Z") == "blair"
+    # a wall-clock merge after explicitly future-dated history never blocks
+    admit(gate, concept(p, "b\n", title="x", owner="cy"), "2099-01-01T00:00:00Z")
+    assert _admit_now(gate, concept(p, "b\n", title="x", owner="dee")) is not None
+    assert gate.sidecar.history(p, "owner")[-1].valid_from == "2099-01-01T00:00:01Z"

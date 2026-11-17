@@ -101,6 +101,14 @@ repository mirrors the paper's **Built** / **Specified only** split (Sec. 3):
 * Deleting a concept closes its open rows at the commit time.
 * `tx_seq` (first-parent commit index) lets the sidecar reconstruct header fields as
   of any snapshot; the replay checks that reconstruction against `git show`.
+* Transaction time is strictly increasing along `main` at Git's one-second
+  resolution (`Gate.tx_time`): an explicit time at or before the last commit that
+  changed a concept file advances to one second after it; a wall-clock commit is
+  stamped with the next whole second and the merge returns only once that second
+  has been reached (a bounded commit-wait, at most about 1 s). So two merges never
+  share a second, no belief row has zero length, and a second-resolution time read
+  between two merges answers with the earlier value. Ordering is recovered from
+  Git commit order on rebuild; valid-time queries also break ties on `tx_seq`.
 * Transaction-time as-of reads resolve an ISO time with
   `git rev-list --first-parent --before=<t> main` and read the file at that commit.
 

@@ -228,7 +228,7 @@ class Sidecar:
         row = self.db.execute(
             "SELECT new_value FROM belief_history WHERE concept=? AND field=? "
             "AND valid_from<=? AND (valid_to IS NULL OR valid_to>?) "
-            "ORDER BY valid_from DESC, tx_seq DESC LIMIT 1",
+            "ORDER BY valid_from DESC, tx_seq DESC, rowid DESC LIMIT 1",
             (concept, field, t, t),
         ).fetchone()
         return _decode(row[0]) if row else None

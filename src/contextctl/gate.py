@@ -13,10 +13,12 @@ come back through this gate.
 
 from __future__ import annotations
 
+import datetime as dt
 import hashlib
 import json
 import os
 import shutil
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -24,7 +26,7 @@ from typing import Any
 from .bundle import Bundle
 from .evidence import EvidenceStore
 from .gitio import GitError, Identity
-from .okf import Concept, OKFError, validate_header
+from .okf import Concept, OKFError, normalize_time, validate_header
 from .reconcile import Decision, Reconciler
 from .sidecar import Sidecar
 
@@ -37,6 +39,15 @@ APPROVED = "approved"
 MERGED = "merged"
 
 NO_HOOKS = ("-c", "core.hooksPath=/dev/null")
+_FMT = "%Y-%m-%dT%H:%M:%SZ"
+
+
+def _now() -> dt.datetime:
+    return dt.datetime.now(dt.timezone.utc)
+
+
+def _parse(t: str) -> dt.datetime:
+    return dt.datetime.strptime(t, _FMT).replace(tzinfo=dt.timezone.utc)
 SEQ_FILE = ".draft-seq"
 
 
@@ -291,6 +302,8 @@ class Gate:
         if not approved:
             return None
         git, main = self.bundle.git, self.bundle.main
+        explicit = when is not None
+        when = self.tx_time(when)
         batch = hashlib.sha256("".join(r.id for r in approved).encode()).hexdigest()[:10]
         branch = f"contextctl/admit-{batch}"
         git.run("checkout", "-q", "-B", branch, main)
@@ -323,6 +336,7 @@ class Gate:
             raise
         finally:
             git.run("branch", "-q", "-D", branch, check=False)
+        self._commit_wait(when, explicit)
         sha = self.bundle.head()
         assert sha is not None
         for r in approved:
@@ -330,6 +344,53 @@ class Gate:
             self._save(r)
         self.sidecar.sync()
         return sha
+
+    def tx_time(self, when: str | None = None) -> str:
+        """Transaction time for the next commit that changes trusted state.
+
+        Git stores commit times at one-second resolution. Two merges in the
+        same wall-clock second used to share a transaction time, so the
+        earlier belief got a zero-length valid interval; and a time read
+        between two merges, truncated to the second, could equal the second
+        merge's time. Either way an as-of / valid-at query at that second
+        answered with the later value.
+
+        Rules (a logical clock over the wall clock, no sub-second state):
+
+        * explicit ``when`` (replays, imports) is used as given, but never at
+          or before the last commit that changed a concept file: then it
+          advances to one second after it;
+        * wall-clock commits (``when`` omitted) are stamped with the *next*
+          whole second after now (and after the last concept commit), and
+          :meth:`_commit_wait` returns only once the wall clock has reached
+          that second. Any time read before the merge started is therefore
+          earlier than its transaction time, and any time read after it
+          returned is at or after it.
+
+        The adjusted time is the commit time itself, so a sidecar rebuild
+        reads the same order back from Git."""
+        if when:
+            t = _parse(normalize_time(when))
+        else:
+            t = _now().replace(microsecond=0) + dt.timedelta(seconds=1)
+        git = self.bundle.git
+        # only commits that changed a concept file write belief rows
+        last = git.last_commit_touching(":(glob)concepts/**/*.md", self.bundle.main)
+        if last:
+            prev = _parse(git.commit_time(last))
+            if t <= prev:
+                t = prev + dt.timedelta(seconds=1)
+        return t.strftime(_FMT)
+
+    @staticmethod
+    def _commit_wait(t: str, explicit: bool) -> None:
+        """Block until the wall clock reaches transaction time ``t`` (at most
+        about one second, and only for wall-clock commits)."""
+        if explicit:
+            return
+        delay = (_parse(t) - _now()).total_seconds()
+        if 0 < delay <= 2:  # a larger gap means explicitly future-dated history: never block
+            time.sleep(delay)
 
     # ------------------------------------------------------------ revert
     def revert(
@@ -341,6 +402,7 @@ class Gate:
         git = self.bundle.git
         made: list[str] = []
         for m in merges:
+            when_m = self.tx_time(when)
             sha = git.head(m)
             if sha is None:
                 raise GateError(f"unknown commit {m}")
@@ -348,7 +410,8 @@ class Gate:
             if len(git.parents(sha)) > 1:
                 args += ["-m", "1"]
             try:
-                git.run(*NO_HOOKS, *args, sha, when=when, who=who)
+                git.run(*NO_HOOKS, *args, sha, when=when_m, who=who)
+                self._commit_wait(when_m, when is not None)
             except GitError as exc:
                 git.run("revert", "--abort", check=False)
                 last = exc.stderr.strip().splitlines()[-1] if exc.stderr.strip() else ""
