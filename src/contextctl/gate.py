@@ -152,7 +152,7 @@ class Gate:
 
         return Reconciler(
             trusted, search=search, theta_dup=cfg.theta_dup, theta_rev=cfg.theta_rev,
-            top_k=cfg.top_k, fact_fields=cfg.fact_fields,
+            top_k=cfg.top_k, fact_fields=cfg.fact_fields, similarity_text=cfg.similarity_text,
         )
 
     def curate(self, draft_ids: list[str] | None = None) -> list[DraftRecord]:

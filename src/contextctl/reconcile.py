@@ -108,6 +108,7 @@ class Reconciler:
         top_k: int = 10,
         fact_fields: Iterable[str] | None = None,
         corpus_texts: Mapping[str, str] | None = None,
+        similarity_text: str = "full",
     ) -> None:
         """``trusted`` maps path -> concept (current trusted state). ``search``
         is a callable ``(query, k) -> list[path]`` (the FTS index); when absent,
@@ -118,7 +119,10 @@ class Reconciler:
         self.theta_rev = theta_rev
         self.top_k = top_k
         self.fact_fields = list(fact_fields) if fact_fields is not None else None
-        texts = corpus_texts or {p: c.search_text(self.fact_fields) for p, c in trusted.items()}
+        self.mode = similarity_text
+        texts = corpus_texts or {
+            p: c.similarity_text(self.fact_fields, self.mode) for p, c in trusted.items()
+        }
         self._texts = dict(texts)
         self._tfidf: TfIdf | None = None
 
@@ -135,7 +139,7 @@ class Reconciler:
         return paths
 
     def reconcile(self, d: Concept) -> Reconciliation:
-        text = d.search_text(self.fact_fields)
+        text = d.similarity_text(self.fact_fields, self.mode)
         c0 = self.trusted.get(d.path)
 
         # Rule 1: Conflict -- scoped to the same-path concept (replay finding (a)).
@@ -148,7 +152,7 @@ class Reconciler:
                     candidates=[(d.path, sim0)],
                 )
 
-        cands = self.candidates(d, text)
+        cands = self.candidates(d, d.search_text(self.fact_fields, self.mode))
         model = self._model(text)
         vd = model.vector(text)
         from .similarity import cosine

@@ -1,0 +1,248 @@
+{
+ "duckdb_crosscheck": {
+  "count_lifetime_orders": {
+   "agree": true,
+   "duckdb_sql": "select sum(count_lifetime_orders) from customers",
+   "duckdb_value": 61948.0,
+   "mf_value": "61948"
+  },
+  "food_orders": {
+   "agree": true,
+   "duckdb_sql": "select count(*) from orders where is_food_order",
+   "duckdb_value": 13759.0,
+   "mf_value": "13759"
+  },
+  "food_revenue": {
+   "agree": true,
+   "duckdb_sql": "select sum(case when is_food_item then product_price else 0 end) from order_items",
+   "duckdb_value": 240877.0,
+   "mf_value": "240877.0"
+  },
+  "lifetime_spend_pretax": {
+   "agree": true,
+   "duckdb_sql": "select sum(lifetime_spend_pretax) from customers",
+   "duckdb_value": 637444.0,
+   "mf_value": "637444.0"
+  },
+  "median_revenue": {
+   "agree": true,
+   "duckdb_sql": "select median(product_price) from order_items",
+   "duckdb_value": 6.0,
+   "mf_value": "6.0"
+  },
+  "order_cost": {
+   "agree": true,
+   "duckdb_sql": "select sum(order_cost) from orders",
+   "duckdb_value": 131788.38,
+   "mf_value": "131788.38"
+  },
+  "order_total": {
+   "agree": true,
+   "duckdb_sql": "select sum(order_total) from orders",
+   "duckdb_value": 671425.37,
+   "mf_value": "671425.37"
+  },
+  "orders": {
+   "agree": true,
+   "duckdb_sql": "select count(*) from orders",
+   "duckdb_value": 61948.0,
+   "mf_value": "61948"
+  },
+  "revenue": {
+   "agree": true,
+   "duckdb_sql": "select sum(product_price) from order_items",
+   "duckdb_value": 637444.0,
+   "mf_value": "637444.0"
+  }
+ },
+ "metrics": {
+  "average_order_value": {
+   "explain_ok": true,
+   "header": [
+    "average_order_value"
+   ],
+   "query_s": 2.561,
+   "returncode": 0,
+   "status": "ok",
+   "value": "10.289985148834507"
+  },
+  "count_lifetime_orders": {
+   "explain_ok": true,
+   "header": [
+    "count_lifetime_orders"
+   ],
+   "query_s": 2.425,
+   "returncode": 0,
+   "status": "ok",
+   "value": "61948"
+  },
+  "cumulative_revenue": {
+   "explain_ok": true,
+   "header": [
+    "cumulative_revenue"
+   ],
+   "query_s": 2.198,
+   "returncode": 0,
+   "status": "ok",
+   "value": "637444.0"
+  },
+  "drink_orders": {
+   "explain_ok": true,
+   "header": [
+    "drink_orders"
+   ],
+   "query_s": 2.337,
+   "returncode": 0,
+   "status": "ok",
+   "value": "60334"
+  },
+  "drink_revenue": {
+   "explain_ok": true,
+   "header": [
+    "drink_revenue"
+   ],
+   "query_s": 2.522,
+   "returncode": 0,
+   "status": "ok",
+   "value": "396567.0"
+  },
+  "drink_revenue_pct": {
+   "explain_ok": true,
+   "header": [
+    "drink_revenue_pct"
+   ],
+   "query_s": 2.36,
+   "returncode": 0,
+   "status": "ok",
+   "value": "0.6221205313721676"
+  },
+  "food_orders": {
+   "explain_ok": true,
+   "header": [
+    "food_orders"
+   ],
+   "query_s": 2.465,
+   "returncode": 0,
+   "status": "ok",
+   "value": "13759"
+  },
+  "food_revenue": {
+   "explain_ok": true,
+   "header": [
+    "food_revenue"
+   ],
+   "query_s": 2.309,
+   "returncode": 0,
+   "status": "ok",
+   "value": "240877.0"
+  },
+  "food_revenue_pct": {
+   "explain_ok": true,
+   "header": [
+    "food_revenue_pct"
+   ],
+   "query_s": 2.494,
+   "returncode": 0,
+   "status": "ok",
+   "value": "0.3778794686278324"
+  },
+  "large_orders": {
+   "explain_ok": true,
+   "header": [
+    "large_orders"
+   ],
+   "query_s": 2.266,
+   "returncode": 0,
+   "status": "ok",
+   "value": "7219"
+  },
+  "lifetime_spend_pretax": {
+   "explain_ok": true,
+   "header": [
+    "lifetime_spend_pretax"
+   ],
+   "query_s": 2.179,
+   "returncode": 0,
+   "status": "ok",
+   "value": "637444.0"
+  },
+  "median_revenue": {
+   "explain_ok": true,
+   "header": [
+    "median_revenue"
+   ],
+   "query_s": 2.285,
+   "returncode": 0,
+   "status": "ok",
+   "value": "6.0"
+  },
+  "new_customer_orders": {
+   "explain_ok": true,
+   "header": [
+    "new_customer_orders"
+   ],
+   "query_s": 2.223,
+   "returncode": 0,
+   "status": "ok",
+   "value": "935"
+  },
+  "order_cost": {
+   "explain_ok": true,
+   "header": [
+    "order_cost"
+   ],
+   "query_s": 2.378,
+   "returncode": 0,
+   "status": "ok",
+   "value": "131788.38"
+  },
+  "order_gross_profit": {
+   "explain_ok": true,
+   "header": [
+    "order_gross_profit"
+   ],
+   "query_s": 2.48,
+   "returncode": 0,
+   "status": "ok",
+   "value": "505655.62"
+  },
+  "order_total": {
+   "explain_ok": true,
+   "header": [
+    "order_total"
+   ],
+   "query_s": 2.374,
+   "returncode": 0,
+   "status": "ok",
+   "value": "671425.37"
+  },
+  "orders": {
+   "explain_ok": true,
+   "header": [
+    "orders"
+   ],
+   "query_s": 2.506,
+   "returncode": 0,
+   "status": "ok",
+   "value": "61948"
+  },
+  "revenue": {
+   "explain_ok": true,
+   "header": [
+    "revenue"
+   ],
+   "query_s": 2.265,
+   "returncode": 0,
+   "status": "ok",
+   "value": "637444.0"
+  },
+  "revenue_growth_mom": {
+   "error_message": "The query includes a metric 'revenue_growth_mom' that specifies a time offset in input metrics: (PydanticMetricInput(name='revenue', filter=None, alias='current_revenue', offset_window=None, offset_to",
+   "explain_ok": false,
+   "query_s": 2.444,
+   "returncode": 1,
+   "status": "error",
+   "value": null
+  }
+ }
+}

@@ -53,10 +53,11 @@ def config() -> dict:
 
 def results_rows() -> str:
     if not RESULTS.exists():
-        return ('        <tr><td colspan="4">Run examples/reproduce_paper.py to fill this '
+        return ('        <tr><td colspan="5">Run examples/reproduce_paper.py to fill this '
                 "table.</td></tr>")
     r = json.loads(RESULTS.read_text())
     syn, pub = r["replay_synthetic"], r.get("replay_public_dbt")
+    pap = r.get("replay_public_dbt_paper")
 
     def cell(d: dict | None, fn) -> str:
         return html.escape(str(fn(d))) if d else "not run"
@@ -68,8 +69,8 @@ def results_rows() -> str:
          lambda d: " / ".join(str(d["counts"][k]) for k in ("New", "Duplicate", "Revision",
                                                             "Conflict"))),
         ("Final concepts", "22", lambda d: d["final_concepts"]),
-        ("As-of reads matching git show", "665/665",
-         lambda d: f"{d['asof_matches']}/{d['asof_checks']}"),
+        ("As-of reads matching git show (field level)", "665/665",
+         lambda d: f"{d['asof_field_matches']}/{d['asof_field_checks']}"),
         ("Rebuilt sidecar = incremental", "yes",
          lambda d: "yes" if d["rebuild_matches"] else "no"),
         ("Identical repeats", "7/7", lambda d: f"{d['repeats']}/{d['repeats']}"
@@ -81,7 +82,8 @@ def results_rows() -> str:
     out = []
     for label, paper, fn in rows:
         out.append(f"        <tr><th scope=\"row\">{html.escape(label)}</th><td>{paper}</td>"
-                   f"<td>{cell(syn, fn)}</td><td>{cell(pub, fn)}</td></tr>")
+                   f"<td>{cell(syn, fn)}</td><td>{cell(pub, fn)}</td>"
+                   f"<td>{cell(pap, fn)}</td></tr>")
     return "\n".join(out)
 
 

@@ -1,7 +1,8 @@
 """Layer 1: generation (untrusted). Connectors fetch evidence and draft files.
 
 Built: :mod:`.notes` (rule-based notes connector, paper Sec. 3) and
-:mod:`.dbt` (the scripted dbt-project harvester used by the replay harness).
+:mod:`.dbt` / :mod:`.dbt_metrics` (the scripted dbt-project harvesters used by
+the replay harness; the latter is the paper's metric-level scope).
 Specified only (paper Sec. 3): repository, document, Confluence, Slack and
 email connectors -- see :mod:`.specified`.
 """

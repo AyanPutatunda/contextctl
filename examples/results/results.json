@@ -1,4 +1,204 @@
 {
+  "ablation_public_dbt": [
+    {
+      "asof_checks": 302,
+      "asof_field_checks": 1510,
+      "asof_field_matches": 1510,
+      "asof_matches": 302,
+      "counts": {
+        "Conflict": 13,
+        "Duplicate": 707,
+        "New": 35,
+        "Revision": 9
+      },
+      "drafts": 764,
+      "final_concepts": 43,
+      "flags": "",
+      "held": 19,
+      "label": "Default (`entries` harvest)",
+      "merges": 8,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 302,
+      "sidecar_tx_matches": 302,
+      "steps": 23
+    },
+    {
+      "asof_checks": 302,
+      "asof_field_checks": 1510,
+      "asof_field_matches": 1510,
+      "asof_matches": 302,
+      "counts": {
+        "Conflict": 13,
+        "Duplicate": 745,
+        "New": 35,
+        "Revision": 9
+      },
+      "drafts": 802,
+      "final_concepts": 43,
+      "flags": "--include-pin",
+      "held": 20,
+      "label": "+ include the pinned commit",
+      "merges": 8,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 302,
+      "sidecar_tx_matches": 302,
+      "steps": 24
+    },
+    {
+      "asof_checks": 95,
+      "asof_field_checks": 475,
+      "asof_field_matches": 475,
+      "asof_matches": 95,
+      "counts": {
+        "Conflict": 10,
+        "Duplicate": 303,
+        "New": 16,
+        "Revision": 6
+      },
+      "drafts": 335,
+      "final_concepts": 22,
+      "flags": "--harvest metrics",
+      "held": 11,
+      "label": "Metric-level harvest only",
+      "merges": 5,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 95,
+      "sidecar_tx_matches": 95,
+      "steps": 23
+    },
+    {
+      "asof_checks": 95,
+      "asof_field_checks": 475,
+      "asof_field_matches": 475,
+      "asof_matches": 95,
+      "counts": {
+        "Conflict": 10,
+        "Duplicate": 303,
+        "New": 15,
+        "Revision": 7
+      },
+      "drafts": 335,
+      "final_concepts": 22,
+      "flags": "--harvest metrics --similarity-text full",
+      "held": 12,
+      "label": "Metric-level harvest, title+facts+body similarity",
+      "merges": 5,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 95,
+      "sidecar_tx_matches": 95,
+      "steps": 23
+    },
+    {
+      "asof_checks": 95,
+      "asof_field_checks": 475,
+      "asof_field_matches": 475,
+      "asof_matches": 95,
+      "counts": {
+        "Conflict": 10,
+        "Duplicate": 322,
+        "New": 16,
+        "Revision": 6
+      },
+      "drafts": 354,
+      "final_concepts": 22,
+      "flags": "--harvest metrics --include-pin",
+      "held": 11,
+      "label": "+ include the pinned commit",
+      "merges": 5,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 95,
+      "sidecar_tx_matches": 95,
+      "steps": 24
+    },
+    {
+      "asof_checks": 117,
+      "asof_field_checks": 585,
+      "asof_field_matches": 585,
+      "asof_matches": 117,
+      "counts": {
+        "Conflict": 10,
+        "Duplicate": 322,
+        "New": 16,
+        "Revision": 25
+      },
+      "drafts": 373,
+      "final_concepts": 22,
+      "flags": "--harvest metrics --include-pin --observed-values examples/jaffle-shop-metricflow",
+      "held": 11,
+      "label": "+ MetricFlow enrichment step",
+      "merges": 6,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 117,
+      "sidecar_tx_matches": 117,
+      "steps": 25
+    },
+    {
+      "asof_checks": 111,
+      "asof_field_checks": 555,
+      "asof_field_matches": 555,
+      "asof_matches": 111,
+      "counts": {
+        "Conflict": 11,
+        "Duplicate": 322,
+        "New": 16,
+        "Revision": 5
+      },
+      "drafts": 354,
+      "final_concepts": 22,
+      "flags": "--profile paper",
+      "held": 6,
+      "label": "`--profile paper` without the enrichment step",
+      "merges": 6,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 111,
+      "sidecar_tx_matches": 111,
+      "steps": 24
+    },
+    {
+      "asof_checks": 133,
+      "asof_field_checks": 665,
+      "asof_field_matches": 665,
+      "asof_matches": 133,
+      "counts": {
+        "Conflict": 11,
+        "Duplicate": 323,
+        "New": 15,
+        "Revision": 24
+      },
+      "drafts": 373,
+      "final_concepts": 22,
+      "flags": "--profile paper --observed-values examples/jaffle-shop-metricflow --similarity-text full",
+      "held": 7,
+      "label": "`--profile paper`, title+facts+body similarity",
+      "merges": 7,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 133,
+      "sidecar_tx_matches": 133,
+      "steps": 25
+    },
+    {
+      "asof_checks": 133,
+      "asof_field_checks": 665,
+      "asof_field_matches": 665,
+      "asof_matches": 133,
+      "counts": {
+        "Conflict": 11,
+        "Duplicate": 322,
+        "New": 16,
+        "Revision": 24
+      },
+      "drafts": 373,
+      "final_concepts": 22,
+      "flags": "--profile paper --observed-values examples/jaffle-shop-metricflow",
+      "held": 6,
+      "label": "**`--profile paper` + enrichment (reproduces the paper)**",
+      "merges": 7,
+      "rebuild_matches": true,
+      "sidecar_tx_checks": 133,
+      "sidecar_tx_matches": 133,
+      "steps": 25
+    }
+  ],
   "bench": [
     {
       "asof_read_ms": 2.82,
@@ -72,15 +272,32 @@
   ],
   "replay_public_dbt": {
     "asof_checks": 302,
+    "asof_field_checks": 1510,
+    "asof_field_matches": 1510,
     "asof_matches": 302,
     "bundle_head": "58e095f",
+    "config": {
+      "asof_fields": [
+        "description",
+        "expr",
+        "filter",
+        "observed_value",
+        "body_digest"
+      ],
+      "harvest": "entries",
+      "held_duplicates": "reject",
+      "include_pin": false,
+      "observed_values": false,
+      "prefix": "models",
+      "similarity_text": "full"
+    },
     "counts": {
       "Conflict": 13,
       "Duplicate": 707,
       "New": 35,
       "Revision": 9
     },
-    "determinism_digest": "fb03d1afae79763f9f80af007faf7e34e99a1a10429a1e1735bd9a7d2c2dc535",
+    "determinism_digest": "da1e09314e83a6aa087c7a45f8f06507c1e3f60361bebfcbdb1185d542e281c4",
     "drafts": 764,
     "example_history": [
       {
@@ -213,17 +430,463 @@
       "tokenizer": "tiktoken cl100k_base"
     }
   },
+  "replay_public_dbt_paper": {
+    "asof_checks": 133,
+    "asof_field_checks": 665,
+    "asof_field_matches": 665,
+    "asof_matches": 133,
+    "bundle_head": "39e8c5e",
+    "config": {
+      "asof_fields": [
+        "description",
+        "expr",
+        "filter",
+        "observed_value",
+        "body_digest"
+      ],
+      "harvest": "metrics",
+      "held_duplicates": "admit",
+      "include_pin": true,
+      "observed_values": true,
+      "prefix": "models",
+      "similarity_text": "body"
+    },
+    "counts": {
+      "Conflict": 11,
+      "Duplicate": 322,
+      "New": 16,
+      "Revision": 24
+    },
+    "determinism_digest": "80b49887f548a4baa1991f62f3745e1d87caa6fef36649441a031b7219d0abc5",
+    "drafts": 373,
+    "example_history": [
+      {
+        "concept": "concepts/metrics/drink_revenue.md",
+        "field": "expr",
+        "rows": [
+          {
+            "new": "case when is_drink_item = 1 then product_price else 0 end",
+            "old": null,
+            "snapshot": "fe50d09",
+            "valid_from": "2024-04-04T00:00:00Z",
+            "valid_to": "2024-09-12T00:00:00Z"
+          },
+          {
+            "new": "case when is_drink_item is true then product_price else 0 end",
+            "old": "case when is_drink_item = 1 then product_price else 0 end",
+            "snapshot": "016a328",
+            "valid_from": "2024-09-12T00:00:00Z",
+            "valid_to": "2025-07-01T00:00:00Z"
+          },
+          {
+            "new": "case when is_drink_item then product_price else 0 end",
+            "old": "case when is_drink_item is true then product_price else 0 end",
+            "snapshot": "438136b",
+            "valid_from": "2025-07-01T00:00:00Z",
+            "valid_to": null
+          }
+        ]
+      },
+      {
+        "concept": "concepts/metrics/food_revenue.md",
+        "field": "expr",
+        "rows": [
+          {
+            "new": "case when is_food_item = 1 then product_price else 0 end",
+            "old": null,
+            "snapshot": "39d1a12",
+            "valid_from": "2023-08-30T00:00:00Z",
+            "valid_to": "2024-09-12T00:00:00Z"
+          },
+          {
+            "new": "case when is_food_item is true then product_price else 0 end",
+            "old": "case when is_food_item = 1 then product_price else 0 end",
+            "snapshot": "016a328",
+            "valid_from": "2024-09-12T00:00:00Z",
+            "valid_to": "2025-07-01T00:00:00Z"
+          },
+          {
+            "new": "case when is_food_item then product_price else 0 end",
+            "old": "case when is_food_item is true then product_price else 0 end",
+            "snapshot": "438136b",
+            "valid_from": "2025-07-01T00:00:00Z",
+            "valid_to": null
+          }
+        ]
+      },
+      {
+        "concept": "concepts/metrics/drink_orders.md",
+        "field": "dimensions",
+        "rows": [
+          {
+            "new": [
+              "is_drink_order:categorical",
+              "is_food_order:categorical",
+              "order_total_dim:categorical",
+              "ordered_at:time"
+            ],
+            "old": null,
+            "snapshot": "32cab94",
+            "valid_from": "2024-02-09T00:00:00Z",
+            "valid_to": "2024-04-04T00:00:00Z"
+          },
+          {
+            "new": [
+              "customer_order_number:categorical",
+              "is_drink_order:categorical",
+              "is_food_order:categorical",
+              "order_total_dim:categorical",
+              "ordered_at:time"
+            ],
+            "old": [
+              "is_drink_order:categorical",
+              "is_food_order:categorical",
+              "order_total_dim:categorical",
+              "ordered_at:time"
+            ],
+            "snapshot": "fe50d09",
+            "valid_from": "2024-04-04T00:00:00Z",
+            "valid_to": null
+          }
+        ]
+      }
+    ],
+    "final_concepts": 22,
+    "held": 6,
+    "merges": 7,
+    "rebuild_matches": true,
+    "rejected_invalid": 0,
+    "repeat_digests_identical": true,
+    "repeats": 7,
+    "sidecar_digest": "112425e32fc4cb34",
+    "sidecar_tx_checks": 133,
+    "sidecar_tx_matches": 133,
+    "source": "https://github.com/dbt-labs/jaffle-shop",
+    "source_head": "7be2c58",
+    "step_log": [
+      {
+        "counts": {
+          "New": 14
+        },
+        "drafts": 14,
+        "held": 0,
+        "merge": "39d1a12",
+        "source_commit": "720c340",
+        "step": 1,
+        "time": "2023-08-30T23:34:22Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 14
+        },
+        "drafts": 14,
+        "held": 0,
+        "merge": null,
+        "source_commit": "6983a81",
+        "step": 2,
+        "time": "2023-08-31T20:24:44Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 14
+        },
+        "drafts": 14,
+        "held": 0,
+        "merge": null,
+        "source_commit": "fe8ee95",
+        "step": 3,
+        "time": "2023-08-31T20:51:40Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 14
+        },
+        "drafts": 14,
+        "held": 0,
+        "merge": null,
+        "source_commit": "6cb4da0",
+        "step": 4,
+        "time": "2023-08-31T23:58:18Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 14
+        },
+        "drafts": 14,
+        "held": 0,
+        "merge": null,
+        "source_commit": "abd17bf",
+        "step": 5,
+        "time": "2023-09-07T13:36:21Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 12
+        },
+        "drafts": 12,
+        "held": 0,
+        "merge": null,
+        "source_commit": "c830af0",
+        "step": 6,
+        "time": "2023-09-07T15:37:59Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 12
+        },
+        "drafts": 12,
+        "held": 0,
+        "merge": null,
+        "source_commit": "24b85bc",
+        "step": 7,
+        "time": "2023-09-28T16:28:43Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 12
+        },
+        "drafts": 12,
+        "held": 0,
+        "merge": null,
+        "source_commit": "ddb8a37",
+        "step": 8,
+        "time": "2023-09-28T19:04:34Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 12
+        },
+        "drafts": 12,
+        "held": 0,
+        "merge": null,
+        "source_commit": "15f0b97",
+        "step": 9,
+        "time": "2023-09-28T19:33:58Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 12
+        },
+        "drafts": 12,
+        "held": 0,
+        "merge": null,
+        "source_commit": "b5399a1",
+        "step": 10,
+        "time": "2024-02-09T18:57:32Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 12,
+          "Revision": 1
+        },
+        "drafts": 13,
+        "held": 1,
+        "merge": "32cab94",
+        "source_commit": "6b6f149",
+        "step": 11,
+        "time": "2024-02-09T20:35:47Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 13
+        },
+        "drafts": 13,
+        "held": 1,
+        "merge": "81b404e",
+        "source_commit": "d975e4d",
+        "step": 12,
+        "time": "2024-02-26T18:03:54Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 13
+        },
+        "drafts": 13,
+        "held": 0,
+        "merge": null,
+        "source_commit": "2021a64",
+        "step": 13,
+        "time": "2024-02-26T23:11:03Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 13
+        },
+        "drafts": 13,
+        "held": 0,
+        "merge": null,
+        "source_commit": "b0b6007",
+        "step": 14,
+        "time": "2024-02-29T02:22:29Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 13
+        },
+        "drafts": 13,
+        "held": 0,
+        "merge": null,
+        "source_commit": "ac611f0",
+        "step": 15,
+        "time": "2024-03-18T09:12:55Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 13
+        },
+        "drafts": 13,
+        "held": 0,
+        "merge": null,
+        "source_commit": "11504ae",
+        "step": 16,
+        "time": "2024-03-27T18:56:53Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 13
+        },
+        "drafts": 13,
+        "held": 0,
+        "merge": null,
+        "source_commit": "2447e1b",
+        "step": 17,
+        "time": "2024-03-29T18:17:40Z"
+      },
+      {
+        "counts": {
+          "Conflict": 7,
+          "Duplicate": 6,
+          "New": 2,
+          "Revision": 4
+        },
+        "drafts": 19,
+        "held": 4,
+        "merge": "fe50d09",
+        "source_commit": "cef41c2",
+        "step": 18,
+        "time": "2024-04-04T20:50:59Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 19
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": null,
+        "source_commit": "b232e30",
+        "step": 19,
+        "time": "2024-04-09T23:58:09Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 19
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": null,
+        "source_commit": "9a147c5",
+        "step": 20,
+        "time": "2024-04-23T19:28:11Z"
+      },
+      {
+        "counts": {
+          "Conflict": 2,
+          "Duplicate": 17
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": "016a328",
+        "source_commit": "0a10ae9",
+        "step": 21,
+        "time": "2024-09-12T14:40:29Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 19
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": null,
+        "source_commit": "9d2a113",
+        "step": 22,
+        "time": "2025-05-22T21:23:56Z"
+      },
+      {
+        "counts": {
+          "Conflict": 2,
+          "Duplicate": 17
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": "438136b",
+        "source_commit": "bb3ecd2",
+        "step": 23,
+        "time": "2025-07-01T14:24:27Z"
+      },
+      {
+        "counts": {
+          "Duplicate": 19
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": null,
+        "source_commit": "7be2c58",
+        "step": 24,
+        "time": "2026-01-21T18:41:18Z"
+      },
+      {
+        "counts": {
+          "Revision": 19
+        },
+        "drafts": 19,
+        "held": 0,
+        "merge": "39e8c5e",
+        "source_commit": "7be2c58",
+        "step": 25,
+        "time": "2026-01-21T18:41:18Z"
+      }
+    ],
+    "steps": 25,
+    "tokens": {
+      "body_only_read": 185,
+      "full_bundle": 33854,
+      "full_bundle_over_raw": 7.09,
+      "full_concept_read": 1418,
+      "orient_search_read": 2223,
+      "orient_search_read_body_only": 990,
+      "raw_sources": 4776,
+      "target": "concepts/metrics/food_revenue.md",
+      "tokenizer": "tiktoken cl100k_base"
+    }
+  },
   "replay_synthetic": {
     "asof_checks": 362,
+    "asof_field_checks": 1810,
+    "asof_field_matches": 1810,
     "asof_matches": 362,
     "bundle_head": "62f0fed",
+    "config": {
+      "asof_fields": [
+        "description",
+        "expr",
+        "filter",
+        "observed_value",
+        "body_digest"
+      ],
+      "harvest": "entries",
+      "held_duplicates": "reject",
+      "include_pin": false,
+      "observed_values": false,
+      "prefix": "models",
+      "similarity_text": "full"
+    },
     "counts": {
       "Conflict": 15,
       "Duplicate": 488,
       "New": 21,
       "Revision": 7
     },
-    "determinism_digest": "09da6a9d6476a28befe327c4b747c2ae1d6cd2eed4f1036acf1cf37a12b9ba57",
+    "determinism_digest": "e7039b2517eb84df48d6f5e5c3a4cea7bd1036a87832132be3dd051358e8a539",
     "drafts": 531,
     "example_history": [
       {

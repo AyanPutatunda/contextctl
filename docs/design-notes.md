@@ -92,6 +92,9 @@ repository mirrors the paper's **Built** / **Specified only** split (Sec. 3):
   2024-09-12).
 * A commit that edits only `valid_from` writes no row: the paper's flagged gap
   (tested).
+* A header field removed by a later commit gets a zero-length tombstone row
+  (`new_value` NULL, `valid_from = valid_to`), so transaction-time reconstruction
+  no longer reports the removed value (tested).
 * A retroactive `valid_from` earlier than the open row's `valid_from` produces a
   zero/negative-length closed row; we keep it for audit rather than rewriting history.
 * Times are normalized to `YYYY-MM-DDTHH:MM:SSZ` (UTC); a bare date means midnight UTC.
@@ -104,16 +107,30 @@ repository mirrors the paper's **Built** / **Specified only** split (Sec. 3):
 ## Replay harness
 
 * Source steps = first-parent commits of the source repository that touch `models/`
-  (up to an optional pin). The paper reports 25 steps for Jaffle Shop at `7be2c58`;
-  this selection rule yields 23, so the paper's harness evidently selected steps
-  differently (not stated in the paper).
-* Every step re-harvests every YAML entry (semantic models, their measures, metrics),
-  which is why most drafts are Duplicates. The paper's 22 final concepts imply a
-  narrower harvest scope than ours (we get 43 on the same project); the paper does
-  not list it.
-* Scripted admission: Duplicate dropped; held Duplicate rejected; Revision/New
-  approved (held Revision admitted at its own path); Conflict approved with proposed
-  values.
+  (up to an optional pin): 23 for Jaffle Shop at `7be2c58`. `--include-pin` also
+  replays the pinned commit when it touches no model file (24), and
+  `--observed-values DIR` adds a final enrichment step with MetricFlow values (25,
+  the paper's count).
+* Harvest scope. `--harvest entries` (default) re-harvests every YAML entry at every
+  step (semantic models, their measures, metrics: 43 final concepts on Jaffle Shop),
+  which is why most drafts are Duplicates. `--harvest metrics` is the paper's scope:
+  one concept per metric, resolved through its measure to its semantic model, with
+  the paper's 14 metric fact fields and a body rendered from them (22 final concepts,
+  as in the paper). See `connectors/dbt_metrics.py`.
+* Similarity text: `full` (title + fact values + body, default for `entries`) or
+  `body` (default for `metrics`; the paper compared bodies).
+* As-of checks are reported two ways: whole-file reads (one per concept and
+  snapshot, `asof_*`) and field-level reads (`asof_field_*`: 5 fields per concept and
+  snapshot, the paper's 665/665 definition; `--asof-fields` changes the list).
+* `--profile paper` = `--harvest metrics --include-pin --held-duplicates admit
+  --similarity-text body`; with `--observed-values examples/jaffle-shop-metricflow`
+  it reproduces the paper's replay exactly (373 = 16/322/24/11, 665/665). The
+  ablation in `examples/results/RESULTS.md` attributes every difference from the
+  default configuration to one of these settings.
+* Scripted admission: Duplicate dropped; held Duplicate rejected (default) or admitted
+  at its own path (`--held-duplicates admit`, as the paper's scripted reviewer did);
+  Revision/New approved (held Revision admitted at its own path); Conflict approved
+  with proposed values.
 * Determinism: fixed identities and source commit timestamps make bundle commit SHAs,
   counts and the sidecar dump identical across repeats (digest compared).
 

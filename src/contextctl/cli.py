@@ -179,6 +179,26 @@ def cmd_revert(a: argparse.Namespace) -> int:
     return 0
 
 
+#: ``--profile paper``: the paper's Jaffle Shop replay configuration (see
+#: examples/results/RESULTS.md, "Reproducing the paper's replay").
+PAPER_PROFILE: dict[str, Any] = {
+    "harvest": "metrics", "include_pin": True, "held_duplicates": "admit",
+    "similarity_text": "body",
+}
+
+
+def _replay_options(a: argparse.Namespace) -> dict[str, Any]:
+    opts: dict[str, Any] = dict(PAPER_PROFILE) if a.profile == "paper" else {}
+    for key in ("harvest", "held_duplicates", "similarity_text", "observed_values"):
+        if getattr(a, key) is not None:
+            opts[key] = getattr(a, key)
+    if a.include_pin is not None:
+        opts["include_pin"] = a.include_pin
+    if a.asof_fields:
+        opts["asof_fields"] = tuple(x for x in a.asof_fields.split(",") if x)
+    return opts
+
+
 def cmd_replay(a: argparse.Namespace) -> int:
     import tempfile
 
@@ -191,8 +211,9 @@ def cmd_replay(a: argparse.Namespace) -> int:
             name = "synthetic:synthetic-beans"
         else:
             src, name = Path(a.source), a.source_name or a.source
+        opts = _replay_options(a)
         rep, digests = replay_repeats(src, repeats=a.repeats, source_name=name, pin=a.pin,
-                                      prefix=a.prefix)
+                                      prefix=a.prefix, **opts)
     data = json.loads(rep.to_json())
     data["repeats"] = a.repeats
     data["repeat_digests_identical"] = len(set(digests)) == 1
@@ -314,6 +335,22 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--source-name")
     s.add_argument("--pin", help="replay up to this source commit")
     s.add_argument("--prefix", default="models")
+    s.add_argument("--profile", choices=["default", "paper"], default="default",
+                   help="'paper': --harvest metrics --include-pin --held-duplicates admit "
+                        "--similarity-text body (add --observed-values for the final step)")
+    s.add_argument("--harvest", choices=["entries", "metrics"],
+                   help="entries (default): every semantic model, measure and metric; "
+                        "metrics: one concept per metric (the paper's scope)")
+    s.add_argument("--include-pin", dest="include_pin", action="store_true", default=None,
+                   help="also replay the pinned commit if it does not touch --prefix")
+    s.add_argument("--no-include-pin", dest="include_pin", action="store_false")
+    s.add_argument("--observed-values", help="directory with mf_values.json (+ <metric>.csv/.sql):"
+                   " adds a final enrichment step (metrics harvest only)")
+    s.add_argument("--held-duplicates", choices=["reject", "admit"],
+                   help="scripted review of a Duplicate held as a cross-path match")
+    s.add_argument("--similarity-text", choices=["full", "body"],
+                   help="text compared by TF-IDF: title+facts+body or body only")
+    s.add_argument("--asof-fields", help="comma-separated fields for the field-level as-of check")
     s.add_argument("--repeats", type=int, default=3)
     s.add_argument("--out")
     s.add_argument("-q", "--quiet", action="store_true")

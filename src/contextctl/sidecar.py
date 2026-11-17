@@ -181,6 +181,11 @@ class Sidecar:
                     "INSERT INTO belief_history VALUES (?,?,?,?,?,NULL,?,?,?)",
                     (path, fname, ov, nv, effective, snap, tx_time, seq),
                 )
+            else:  # field removed from the header: zero-length tombstone row
+                db.execute(
+                    "INSERT INTO belief_history VALUES (?,?,?,NULL,?,?,?,?,?)",
+                    (path, fname, ov, effective, effective, snap, tx_time, seq),
+                )
         db.execute(
             "INSERT OR REPLACE INTO concepts VALUES (?,?,?,?,?,?,?)",
             (
@@ -192,7 +197,7 @@ class Sidecar:
         self._fts_delete(db, path)
         cur = db.execute(
             "INSERT INTO concepts_fts(path, title, content) VALUES (?,?,?)",
-            (path, new.title, new.search_text(ff)),
+            (path, new.title, new.search_text(ff, self.bundle.config.similarity_text)),
         )
         db.execute("INSERT INTO fts_map VALUES (?,?)", (path, cur.lastrowid))
         db.execute("DELETE FROM links WHERE src=?", (path,))
@@ -231,14 +236,14 @@ class Sidecar:
     def fields_as_of_tx(self, concept: str, tx_seq: int) -> dict[str, Any]:
         """Transaction-time reconstruction from the sidecar: for each tracked
         field, the latest value written at or before commit number ``tx_seq``
-        (``None`` if the concept did not exist then)."""
+        (absent if the concept did not exist then or the field had been removed)."""
         rows = self.db.execute(
             "SELECT field, new_value FROM belief_history b WHERE concept=? AND tx_seq = ("
             " SELECT MAX(tx_seq) FROM belief_history WHERE concept=b.concept "
             " AND field=b.field AND tx_seq<=?)",
             (concept, tx_seq),
         ).fetchall()
-        return {f: _decode(v) for f, v in rows}
+        return {f: _decode(v) for f, v in rows if v is not None}  # tombstones: absent
 
     def search(self, query: str, k: int = 10) -> list[tuple[str, str, float]]:
         """Full-text search; returns ``(path, title, bm25)`` best first."""

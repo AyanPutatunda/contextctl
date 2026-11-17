@@ -167,16 +167,16 @@
       <li><strong>(d)</strong> Reverting one merge conflicted with a later merge of the same files.</li>
     </ul>
     <h3>Reproduced with this repository</h3>
-    <p><span class="label label-alt">Reproduced (this implementation)</span> A clean re-implementation from the paper's text, re-run on a fully synthetic project and on the same public dbt history. Counts differ from the paper because the harvester's scope is our reading of the text; the checks and the worked example match.</p>
+    <p><span class="label label-alt">Reproduced (this implementation)</span> A clean re-implementation from the paper's text, re-run on a fully synthetic project and on the same public dbt history. With <code>--profile paper</code> (one concept per metric, the pinned commit replayed, held renames approved, body-only similarity, plus the MetricFlow values for the final step) the public replay reproduces the paper's counts exactly: 373 drafts (16 / 322 / 24 / 11) and 665/665 as-of reads. The default configuration harvests every semantic model, measure and metric, so its counts are larger; <code>examples/results/RESULTS.md</code> attributes each difference to one setting.</p>
     <div class="table-wrap">
     <table class="results">
-      <thead><tr><th scope="col">Metric</th><th scope="col">Paper</th><th scope="col">Synthetic replay</th><th scope="col">Public dbt replay</th></tr></thead>
+      <thead><tr><th scope="col">Metric</th><th scope="col">Paper</th><th scope="col">Synthetic replay</th><th scope="col">Public dbt, default</th><th scope="col">Public dbt, <code>--profile paper</code></th></tr></thead>
       <tbody>
 {{RESULTS_ROWS}}
       </tbody>
     </table>
     </div>
-    <p class="muted small">Every number in this table comes from <code>examples/reproduce_paper.py</code> (results in <code>examples/results/</code>). Timings depend on hardware.</p>
+    <p class="muted small">Every number in this table comes from <code>examples/reproduce_paper.py</code> (results in <code>examples/results/</code>). Reproduce the paper's replay with <code>contextctl replay --source jaffle-shop --pin 7be2c58 --profile paper --observed-values examples/jaffle-shop-metricflow</code>. Token counts depend on file formatting and are not expected to match; timings depend on hardware.</p>
   </div>
 </section>
 

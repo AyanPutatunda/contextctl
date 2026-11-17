@@ -123,3 +123,16 @@ def test_scd2_invariants_property(tmp_path_factory, seq):
         text = srv.read(P, as_of=probe)
         assert text is not None
         assert Concept.parse(P, text).header["expr"] == g.sidecar.value_at(P, "expr", probe)
+
+
+
+def test_removed_field_writes_tombstone(gate, bundle):
+    p = "concepts/x.md"
+    admit(gate, concept(p, "b\n", title="x", owner="ana", supersedes=[{"snapshot": "abc"}]),
+          "2024-02-01T00:00:00Z")
+    admit(gate, concept(p, "b and more words\n", title="x", owner="ana"), "2024-03-01T00:00:00Z")
+    seq = len(bundle.git.first_parent_log(bundle.main)) - 1
+    got = gate.sidecar.fields_as_of_tx(p, seq)
+    assert "supersedes" not in got and got["owner"] == "ana"
+    assert gate.sidecar.fields_as_of_tx(p, seq - 1)["supersedes"] == [{"snapshot": "abc"}]
+    assert gate.sidecar.value_at(p, "supersedes", "2024-06-01") is None

@@ -166,15 +166,24 @@ class Concept:
         out["body_digest"] = canonical(body_digest(self.body))
         return out
 
-    def search_text(self, fact_fields: Iterable[str] | None = None) -> str:
-        """Text used for full-text search and TF-IDF similarity: title, fact
-        values and body. Provenance is excluded so a provenance-only update
-        is textually identical to the concept it updates."""
+    def search_text(self, fact_fields: Iterable[str] | None = None, mode: str = "full") -> str:
+        """Text indexed for full-text search. ``full`` (default): title, fact
+        values and body. ``body``: title and body only. Provenance is excluded
+        in both, so a provenance-only update is textually identical to the
+        concept it updates."""
+        if mode == "body":
+            return f"{self.title}\n{self.body}"
         parts = [self.title]
         for k, v in sorted(self.facts(fact_fields).items()):
             parts.append(f"{k} {v if isinstance(v, str) else canonical(v)}")
         parts.append(self.body)
         return "\n".join(parts)
+
+    def similarity_text(self, fact_fields: Iterable[str] | None = None, mode: str = "full") -> str:
+        """Text compared by TF-IDF cosine. ``full`` (default) is
+        :meth:`search_text`; ``body`` compares bodies only (paper Sec. 2: facts
+        stated only in the body affect only ``sim``)."""
+        return self.body if mode == "body" else self.search_text(fact_fields)
 
     def links(self) -> list[str]:
         """Outgoing links: ``[[path]]`` wiki links, relative ``.md`` links and

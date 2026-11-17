@@ -39,6 +39,7 @@ class BundleConfig:
     top_k: int = 10
     fact_fields: list[str] | None = None  # None: every non-provenance header field
     main_branch: str = "main"
+    similarity_text: str = "full"  # "full": title+facts+body; "body": body only
     extra: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
@@ -46,7 +47,7 @@ class BundleConfig:
         if not path.exists():
             return cls()
         raw = yaml.safe_load(path.read_text()) or {}
-        known = {"theta_dup", "theta_rev", "top_k", "fact_fields", "main_branch"}
+        known = {"theta_dup", "theta_rev", "top_k", "fact_fields", "main_branch", "similarity_text"}
         cfg = cls(**{k: v for k, v in raw.items() if k in known})
         cfg.extra = {k: v for k, v in raw.items() if k not in known}
         cfg.check()
@@ -57,6 +58,8 @@ class BundleConfig:
             raise ValueError("require 0 <= theta_rev <= theta_dup <= 1")
         if self.top_k < 1:
             raise ValueError("top_k must be >= 1")
+        if self.similarity_text not in ("full", "body"):
+            raise ValueError("similarity_text must be 'full' or 'body'")
 
     def dump(self) -> str:
         data: dict[str, Any] = {
@@ -65,6 +68,8 @@ class BundleConfig:
             "top_k": self.top_k,
             "main_branch": self.main_branch,
         }
+        if self.similarity_text != "full":
+            data["similarity_text"] = self.similarity_text
         if self.fact_fields is not None:
             data["fact_fields"] = list(self.fact_fields)
         data.update(self.extra)

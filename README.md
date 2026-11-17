@@ -82,7 +82,9 @@ contextctl provenance PATH                concept -> commit -> evidence -> sourc
 contextctl evidence put FILE | verify
 contextctl sidecar sync|rebuild|check
 contextctl revert MERGE...                revert merges (newest first)
-contextctl replay [--source PATH|synthetic] [--pin SHA] [--repeats N]
+contextctl replay [--source PATH|synthetic] [--pin SHA] [--repeats N] [--profile paper]
+                  [--harvest entries|metrics] [--include-pin] [--observed-values DIR]
+                  [--held-duplicates reject|admit] [--similarity-text full|body]
 contextctl selfcheck | bench | mcp
 ```
 
@@ -103,7 +105,7 @@ Global: `-C/--bundle DIR` (or `CONTEXTCTL_BUNDLE`). Reviewer name:
 | Sec. 2, P1/P2 and their gaps | `serving.provenance`, `tests/test_gate.py` (`test_tamper_finding_b`) |
 | Sec. 3, built connector (notes) / specified connectors | `connectors/notes.py` / `connectors/specified.py` |
 | Sec. 3, nine-check lifecycle | `src/contextctl/lifecycle.py` |
-| Sec. 3 + App. C, replay harness | `src/contextctl/replay.py`, `connectors/dbt.py` |
+| Sec. 3 + App. C, replay harness | `src/contextctl/replay.py`, `connectors/dbt.py`, `connectors/dbt_metrics.py` (paper scope) |
 | Sec. 3, finding (d) revert conflict | `gate.revert`, `tests/test_gate.py` (`test_revert_finding_d`) |
 | App. B, worked bitemporal example | `tests/test_sidecar.py` |
 | App. C, microbenchmarks | `src/contextctl/bench.py` |
@@ -117,9 +119,26 @@ Built vs specified, and every interpretation choice, is listed in
 [`examples/results/RESULTS.md`](examples/results/RESULTS.md) compares the paper's
 measured numbers with this implementation on (a) a fully synthetic dbt-style
 project and (b) the same public dbt Jaffle Shop history the paper replays (cloned
-at runtime, nothing committed). All checks pass (as-of reads, sidecar rebuild,
-identical repeats) and the Appendix B rows reproduce; draft counts differ because
-the harvester's scope is our reading of the paper.
+at runtime; no file from it is committed). All checks pass (as-of reads, sidecar
+rebuild, identical repeats) and the Appendix B rows reproduce.
+
+The paper's replay counts reproduce exactly with `--profile paper`:
+
+```bash
+git clone https://github.com/dbt-labs/jaffle-shop /tmp/jaffle-shop
+contextctl replay --source /tmp/jaffle-shop --pin 7be2c58 --profile paper \
+    --observed-values examples/jaffle-shop-metricflow --repeats 7
+# 25 steps, 7 merges, 22 concepts, 373 drafts = 16 New / 322 Duplicate /
+# 24 Revision / 11 Conflict, field-level as-of reads 665/665, 7/7 identical repeats
+```
+
+`--profile paper` means `--harvest metrics --include-pin --held-duplicates admit
+--similarity-text body`; `--observed-values` supplies the MetricFlow values for the
+paper's final enrichment step. The default configuration (`--harvest entries`)
+harvests every semantic model, measure and metric and gives 764 drafts on the same
+history (302 whole-file / 1,510 field-level as-of reads); `contextctl replay` with
+no `--source` runs the synthetic project (531 drafts). RESULTS.md, "Differences
+from the paper", attributes each difference to one setting.
 
 ## Development
 
@@ -137,7 +156,9 @@ lives in [`site/`](site/) (static HTML, `python3 site/build.py`).
 ## Data
 
 Synthetic data only. The `examples/` notes and the generated dbt project are
-fictional. The optional public replay reads the public dbt Jaffle Shop repository.
+fictional. The optional public replay reads the public dbt Jaffle Shop repository;
+`examples/jaffle-shop-metricflow/` holds the overall metric values MetricFlow computed
+on that public project (see its README).
 
 ## Citation
 

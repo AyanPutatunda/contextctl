@@ -1,14 +1,16 @@
 """Replay harness (paper, Sec. 3 and Appendix C).
 
 Replays the first-parent history of a source Git repository (a dbt project)
-through the full no-model pipeline: harvest every YAML entry at each step
-(layer 1), validate + reconcile + scripted admission + ``--no-ff`` merge
-(layer 2), post-merge sidecar sync (layer 3), and serving reads (layer 4).
+through the full no-model pipeline: harvest the project at each step (layer 1;
+every YAML entry by default, or one concept per metric with ``harvest="metrics"``),
+validate + reconcile + scripted admission + ``--no-ff`` merge (layer 2), post-merge
+sidecar sync (layer 3), and serving reads (layer 4).
 
 Scripted admission policy (no model, no human):
 
 * Duplicate (not held) -> dropped by the gate;
-* held Duplicate -> rejected (it matches a different concept verbatim);
+* held Duplicate -> rejected (it matches a different concept verbatim), or
+  admitted at its own path with ``held_duplicates="admit"`` (the paper's policy);
 * Revision / New -> approved; a held Revision is admitted at its own path;
 * Conflict -> approved with the proposed values; ``supersedes`` recorded.
 
@@ -18,7 +20,8 @@ commit SHAs and an identical sidecar dump.
 
 End-of-run checks: every as-of read (by transaction *time*) at every snapshot
 for every concept is compared with ``git show <snapshot>:<path>``; the
-sidecar's transaction-time reconstruction is compared with the parsed header;
+sidecar's transaction-time reconstruction is compared with the parsed header,
+as a whole and field by field (``asof_fields``, the paper's 665/665 count);
 a freshly rebuilt sidecar is compared row for row with the incremental one.
 """
 
@@ -37,6 +40,7 @@ from . import tokens
 from .bundle import Bundle, BundleConfig
 from .connectors import Harvest
 from .connectors import dbt as dbt_connector
+from .connectors import dbt_metrics as metrics_connector
 from .gate import DROPPED, PENDING, Gate
 from .gitio import Git, Identity
 from .okf import canonical
@@ -64,6 +68,7 @@ class StepResult:
 class ReplayReport:
     source: str
     source_head: str
+    config: dict[str, Any] = field(default_factory=dict)
     steps: int = 0
     merges: int = 0
     final_concepts: int = 0
@@ -73,6 +78,8 @@ class ReplayReport:
     rejected_invalid: int = 0
     asof_checks: int = 0
     asof_matches: int = 0
+    asof_field_checks: int = 0
+    asof_field_matches: int = 0
     sidecar_tx_checks: int = 0
     sidecar_tx_matches: int = 0
     rebuild_matches: bool = False
@@ -92,17 +99,35 @@ class ReplayReport:
         return json.dumps(d, indent=2, sort_keys=True, default=str) + "\n"
 
 
-def source_steps(src: Git, ref: str, prefix: str, pin: str | None = None) -> list[str]:
-    """First-parent commits of ``ref`` (up to ``pin``) that touch ``prefix``."""
+HARVESTS = ("entries", "metrics")
+#: Fields compared per (snapshot, concept) by the field-level as-of check. These
+#: are the fields the paper's harness compared (its 665/665 = 133 concept
+#: snapshots x 5 fields); ``body_digest`` is our name for the body hash.
+ASOF_FIELDS: tuple[str, ...] = ("description", "expr", "filter", "observed_value", "body_digest")
+
+
+def source_steps(
+    src: Git, ref: str, prefix: str, pin: str | None = None, include_pin: bool = False
+) -> list[str]:
+    """First-parent commits of ``ref`` (up to ``pin``) that touch ``prefix``.
+    With ``include_pin`` the pinned commit itself is appended as a final step
+    when it does not touch ``prefix`` (the paper's harness did this)."""
     tip = pin or ref
     out = src.run("rev-list", "--first-parent", "--reverse", tip, "--", prefix)
-    return [x for x in out.splitlines() if x]
+    steps = [x for x in out.splitlines() if x]
+    if include_pin:
+        full = src.head(tip)
+        if full and (not steps or steps[-1] != full):
+            steps.append(full)
+    return steps
 
 
-def files_at(src: Git, rev: str, prefix: str) -> dict[str, bytes]:
+def files_at(
+    src: Git, rev: str, prefix: str, exts: tuple[str, ...] = (".yml", ".yaml")
+) -> dict[str, bytes]:
     files = {}
     for p in src.ls_tree(rev, prefix):
-        if p.endswith((".yml", ".yaml")):
+        if p.endswith(exts):
             files[p] = src.run_bytes("show", f"{rev}:{p}")
     return files
 
@@ -117,11 +142,43 @@ def replay(
     max_steps: int | None = None,
     harvester: Harvester | None = None,
     measure_tokens: bool = True,
+    harvest: str = "entries",
+    include_pin: bool = False,
+    observed_values: Path | str | None = None,
+    held_duplicates: str = "reject",
+    similarity_text: str | None = None,
+    asof_fields: tuple[str, ...] | list[str] = ASOF_FIELDS,
 ) -> ReplayReport:
+    """Replay ``source`` into a fresh bundle at ``bundle_dir``.
+
+    ``harvest``: ``entries`` (default; every semantic model, measure and metric
+    is a concept, :mod:`.connectors.dbt`) or ``metrics`` (one concept per
+    metric, the paper's scope, :mod:`.connectors.dbt_metrics`).
+    ``include_pin``: also replay the pinned commit when it does not touch
+    ``prefix``. ``observed_values``: a directory of MetricFlow results; adds one
+    final enrichment step (``metrics`` harvest only). ``held_duplicates``:
+    ``reject`` (default) or ``admit`` a held cross-path Duplicate at its own
+    path. ``similarity_text``: ``full`` or ``body`` (default: ``full`` for
+    ``entries``, ``body`` for ``metrics``).
+    """
+    if harvest not in HARVESTS:
+        raise ValueError(f"harvest must be one of {HARVESTS}")
+    if held_duplicates not in ("reject", "admit"):
+        raise ValueError("held_duplicates must be 'reject' or 'admit'")
+    if observed_values is not None and harvest != "metrics":
+        raise ValueError("observed_values needs harvest='metrics'")
     src = Git(Path(source))
-    harvest = harvester or dbt_connector.harvest_tree
+    exts: tuple[str, ...]
+    if harvest == "metrics":
+        default_harvester: Harvester = metrics_connector.harvest_tree
+        fact_fields, sim_mode = metrics_connector.FACT_FIELDS, "body"
+        exts = (".yml", ".yaml", ".sql")
+    else:
+        default_harvester = dbt_connector.harvest_tree
+        fact_fields, exts, sim_mode = dbt_connector.FACT_FIELDS, (".yml", ".yaml"), "full"
+    harvest_fn = harvester or default_harvester
     name = source_name or f"git+{Path(source).name}"
-    steps = source_steps(src, ref, prefix, pin)
+    steps = source_steps(src, ref, prefix, pin, include_pin)
     if max_steps is not None:
         steps = steps[:max_steps]
     if not steps:
@@ -130,7 +187,7 @@ def replay(
     first_time = src.commit_time(steps[0])
     bundle = Bundle.init(
         bundle_dir,
-        BundleConfig(fact_fields=list(dbt_connector.FACT_FIELDS)),
+        BundleConfig(fact_fields=list(fact_fields), similarity_text=similarity_text or sim_mode),
         when="2000-01-01T00:00:00Z" if first_time > "2000" else first_time,
         who=REPLAY_IDENTITY,
         install_hook=False,
@@ -138,10 +195,15 @@ def replay(
     sidecar = Sidecar(bundle)
     gate = Gate(bundle, sidecar)
     report = ReplayReport(source=name, source_head=head[:7])
+    report.config = {
+        "harvest": harvest, "include_pin": include_pin,
+        "observed_values": observed_values is not None, "held_duplicates": held_duplicates,
+        "similarity_text": bundle.config.similarity_text, "prefix": prefix,
+        "asof_fields": list(asof_fields),
+    }
     totals: Counter[str] = Counter()
-    for i, sha in enumerate(steps, 1):
-        when = src.commit_time(sha)
-        harvests = harvest(files_at(src, sha, prefix), name, sha, when)
+
+    def run_step(i: int, sha: str, when: str, harvests: list[Harvest]) -> None:
         ids = [
             gate.propose(h.concept, h.evidence, proposer=str(h.concept.header.get("actor", "")))
             for h in harvests
@@ -161,7 +223,7 @@ def replay(
                 continue
             if r.reconciliation["held"]:
                 held += 1
-                if dec == "Duplicate":
+                if dec == "Duplicate" and held_duplicates == "reject":
                     gate.reject(r.id, REVIEWER, "held duplicate of a different concept")
                     continue
                 gate.approve(r.id, REVIEWER, as_new=True)
@@ -177,13 +239,23 @@ def replay(
             StepResult(i, sha[:7], when, len(ids), dict(sorted(step_counts.items())), held,
                        merge[:7] if merge else None)
         )
-    report.steps = len(steps)
+
+    for i, sha in enumerate(steps, 1):
+        when = src.commit_time(sha)
+        run_step(i, sha, when, harvest_fn(files_at(src, sha, prefix, exts), name, sha, when))
+    if observed_values is not None:
+        last = steps[-1]
+        when = src.commit_time(last)
+        base = harvest_fn(files_at(src, last, prefix, exts), name, last, when)
+        run_step(len(steps) + 1, last, when,
+                 metrics_connector.enrich(base, observed_values, name, when))
+    report.steps = len(report.step_log)
     report.merges = sum(1 for s in report.step_log if s.merge)
     report.drafts = sum(s.drafts for s in report.step_log)
     report.counts = {k: totals.get(k, 0) for k in ("New", "Duplicate", "Revision", "Conflict")}
     report.final_concepts = len(bundle.concept_paths())
     report.bundle_head = (bundle.head() or "")[:7]
-    _check(bundle, sidecar, report)
+    _check(bundle, sidecar, report, tuple(asof_fields))
     if measure_tokens:
         report.tokens = token_costs(bundle, sidecar, files_at(src, steps[-1], prefix))
     report.example_history = _example_history(sidecar)
@@ -191,7 +263,10 @@ def replay(
     return report
 
 
-def _check(bundle: Bundle, sidecar: Sidecar, report: ReplayReport) -> None:
+def _check(
+    bundle: Bundle, sidecar: Sidecar, report: ReplayReport,
+    asof_fields: tuple[str, ...] = ASOF_FIELDS,
+) -> None:
     git = bundle.git
     server = Server(bundle, sidecar)
     log = git.first_parent_log(bundle.main)
@@ -207,9 +282,14 @@ def _check(bundle: Bundle, sidecar: Sidecar, report: ReplayReport) -> None:
             c = bundle.read(path, sha)
             assert c is not None
             want = {k: json.loads(v) for k, v in c.tracked_fields().items()}
+            got = sidecar.fields_as_of_tx(path, seq)
             report.sidecar_tx_checks += 1
-            if sidecar.fields_as_of_tx(path, seq) == want:
+            if got == want:
                 report.sidecar_tx_matches += 1
+            for f in asof_fields:  # field-level as-of reads (the paper's count)
+                report.asof_field_checks += 1
+                if got.get(f) == want.get(f):
+                    report.asof_field_matches += 1
     with tempfile.TemporaryDirectory() as td:
         fresh = Sidecar(bundle, Path(td) / "rebuilt.sqlite")
         fresh.rebuild()
