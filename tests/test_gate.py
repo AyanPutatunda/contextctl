@@ -20,7 +20,9 @@ def note(owner="alex", path="concepts/p.md", body=BODY, data=b"slack thread v1",
 def test_full_cycle_new_dup_conflict(gate, bundle):
     c, ev = note()
     did = gate.propose(c, ev, proposer="agent")
-    assert gate.propose(c, ev) == did  # idempotent
+    again = gate.propose(c, ev)
+    assert again != did  # every proposal gets its own draft ID
+    gate.reject(again, "rev", "re-proposed")
     assert bundle.concept_paths() == []  # staging only
     r = gate.curate([did])[0]
     assert r.status == PENDING and r.reconciliation["decision"] == "New"
@@ -152,3 +154,40 @@ def test_provenance_failures(gate, bundle):
           "2024-02-01T00:00:00Z")
     p = srv.provenance("concepts/n.md")
     assert not p.ok and p.hops[-1].detail == "no evidence cited"
+
+
+def test_back_to_back_identical_ingests_get_unique_ids_and_dedupe(gate, bundle):
+    """Regression: draft IDs were the content digest alone, and ``fetched_at``
+    has one-second resolution, so two identical ingests in the same second got
+    the same ID and the second one skipped reconciliation (a demo slept 1 s to
+    avoid it). Tight loop, no sleeps."""
+    ids = []
+    c, ev = note()
+    for _ in range(25):
+        ids.append(gate.propose(c, ev))
+    assert len(set(ids)) == len(ids) == 25
+    assert ids == sorted(ids)  # counter prefix: ingestion order
+    first = gate.curate([ids[0]])[0]
+    assert first.reconciliation["decision"] == "New"
+    for did in ids[1:]:
+        gate.reject(did, "rev", "test")
+    gate.approve(ids[0], "rev")
+    gate.merge("admit", when="2024-02-01T00:00:00Z", who=WHO)
+    for _ in range(10):  # identical re-ingest right after the merge, same second
+        did = gate.propose(c, ev)
+        assert did not in ids
+        ids.append(did)
+        r = gate.curate([did])[0]
+        assert r.reconciliation["decision"] == "Duplicate" and r.status == DROPPED
+    assert len(set(ids)) == len(ids)
+
+
+def test_draft_ids_survive_clear_and_new_gate(gate, bundle):
+    from contextctl.gate import Gate
+
+    c, ev = note()
+    a = gate.propose(c, ev)
+    gate.reject(a, "rev")
+    gate.clear()
+    b = Gate(bundle, gate.sidecar).propose(c, ev)  # a fresh Gate on the same store
+    assert a != b and int(b.split("-")[0]) == int(a.split("-")[0]) + 1

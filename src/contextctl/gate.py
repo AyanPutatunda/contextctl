@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -36,6 +37,16 @@ APPROVED = "approved"
 MERGED = "merged"
 
 NO_HOOKS = ("-c", "core.hooksPath=/dev/null")
+SEQ_FILE = ".draft-seq"
+
+
+def _lock(f: Any) -> None:
+    """Exclusive advisory lock until ``f`` is closed (no-op where unsupported)."""
+    try:
+        import fcntl
+    except ImportError:  # pragma: no cover - Windows
+        return
+    fcntl.flock(f.fileno(), fcntl.LOCK_EX)
 
 
 class GateError(RuntimeError):
@@ -97,12 +108,37 @@ class Gate:
         for data, uri, fetched_at in evidence or []:
             self.bundle.staging_evidence.put(data, uri, fetched_at)
         text = concept.dumps()
-        draft_id = hashlib.sha256(f"{concept.path}\0{text}".encode()).hexdigest()[:16]
-        if not self._rec_file(draft_id).exists():
-            self._draft_file(draft_id).write_text(text)
-            rec = DraftRecord(draft_id, concept.path, proposer)
-            self._save(rec)
+        digest = hashlib.sha256(f"{concept.path}\0{text}".encode()).hexdigest()[:12]
+        while True:
+            draft_id = f"{self._next_seq():08d}-{digest}"
+            try:  # O_EXCL: never reuse or overwrite an existing draft, even across processes
+                fd = os.open(self._draft_file(draft_id), os.O_WRONLY | os.O_CREAT | os.O_EXCL)
+            except FileExistsError:  # pragma: no cover - only if the counter file was reset
+                continue
+            with os.fdopen(fd, "w") as f:
+                f.write(text)
+            break
+        self._save(DraftRecord(draft_id, concept.path, proposer))
         return draft_id
+
+    def _next_seq(self) -> int:
+        """Monotonic per-store draft counter, persisted in the staging directory
+        and incremented under an exclusive file lock. Draft IDs are
+        ``<counter>-<content digest>``: unique for every proposal (two identical
+        proposals in the same second used to collide when the ID was the
+        content digest alone, because ``fetched_at`` has one-second resolution),
+        and deterministic for a scripted sequence such as a replay."""
+        path = self.dir / SEQ_FILE
+        with open(path, "a+") as f:
+            _lock(f)
+            f.seek(0)
+            raw = f.read().strip()
+            n = int(raw) + 1 if raw else 1
+            f.seek(0)
+            f.truncate()
+            f.write(f"{n}\n")
+            f.flush()
+        return n
 
     def _save(self, rec: DraftRecord) -> None:
         self._rec_file(rec.id).write_text(rec.to_json())

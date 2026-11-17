@@ -125,3 +125,30 @@ def test_cli_selfcheck_bench_replay(tmp_path, capsys):
     assert main(["replay", "--repeats", "1", "--out", str(out), "-q"]) == 0
     data = json.loads(out.read_text())
     assert data["repeat_digests_identical"] and data["steps"] == 25
+
+
+def test_cli_back_to_back_ingest_is_duplicate(tmp_path, capsys):
+    """Regression for the per-second draft-ID collision: ingest, admit, and
+    re-ingest the same notes immediately (no sleep); the re-ingest must get a
+    new draft ID and be classified Duplicate."""
+    b = str(tmp_path / "bundle")
+    notes_dir = tmp_path / "notes"
+    notes_dir.mkdir()
+    (notes_dir / "p.md").write_text("# Payments owner\nOwner: alex\n\nOwned by alex.\n")
+    assert main(["-C", b, "init"]) == 0
+    assert main(["-C", b, "ingest", str(notes_dir)]) == 0
+    assert main(["-C", b, "curate"]) == 0
+    capsys.readouterr()
+    assert main(["-C", b, "review", "list"]) == 0
+    first = json.loads(capsys.readouterr().out)[0]
+    assert main(["-C", b, "review", "approve", first["id"], "--reviewer", "r"]) == 0
+    assert main(["-C", b, "merge"]) == 0
+    seen = {first["id"]}
+    for _ in range(5):
+        assert main(["-C", b, "ingest", str(notes_dir)]) == 0
+        capsys.readouterr()
+        assert main(["-C", b, "curate"]) == 0
+        recs = json.loads(capsys.readouterr().out)
+        assert len(recs) == 1 and recs[0]["id"] not in seen
+        assert recs[0]["decision"] == "Duplicate" and recs[0]["status"] == "dropped"
+        seen.add(recs[0]["id"])

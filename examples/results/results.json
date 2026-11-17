@@ -275,7 +275,7 @@
     "asof_field_checks": 1510,
     "asof_field_matches": 1510,
     "asof_matches": 302,
-    "bundle_head": "58e095f",
+    "bundle_head": "d29bafc",
     "config": {
       "asof_fields": [
         "description",
@@ -297,7 +297,7 @@
       "New": 35,
       "Revision": 9
     },
-    "determinism_digest": "da1e09314e83a6aa087c7a45f8f06507c1e3f60361bebfcbdb1185d542e281c4",
+    "determinism_digest": "d4a9e22ea29a8c4910943b1805a4761d2ac90f15ae36b054604dc63e7b691868",
     "drafts": 764,
     "example_history": [
       {
@@ -307,21 +307,21 @@
           {
             "new": "case when is_drink_item = 1 then product_price else 0 end",
             "old": null,
-            "snapshot": "b15bfd7",
+            "snapshot": "3b9ceb1",
             "valid_from": "2023-08-30T23:34:22Z",
             "valid_to": "2024-09-12T14:40:29Z"
           },
           {
             "new": "case when is_drink_item is true then product_price else 0 end",
             "old": "case when is_drink_item = 1 then product_price else 0 end",
-            "snapshot": "a2c8db0",
+            "snapshot": "ee28ad3",
             "valid_from": "2024-09-12T14:40:29Z",
             "valid_to": "2025-07-01T14:24:27Z"
           },
           {
             "new": "case when is_drink_item then product_price else 0 end",
             "old": "case when is_drink_item is true then product_price else 0 end",
-            "snapshot": "58e095f",
+            "snapshot": "d29bafc",
             "valid_from": "2025-07-01T14:24:27Z",
             "valid_to": null
           }
@@ -334,21 +334,21 @@
           {
             "new": "case when is_food_item = 1 then product_price else 0 end",
             "old": null,
-            "snapshot": "b15bfd7",
+            "snapshot": "3b9ceb1",
             "valid_from": "2023-08-30T23:34:22Z",
             "valid_to": "2024-09-12T14:40:29Z"
           },
           {
             "new": "case when is_food_item is true then product_price else 0 end",
             "old": "case when is_food_item = 1 then product_price else 0 end",
-            "snapshot": "a2c8db0",
+            "snapshot": "ee28ad3",
             "valid_from": "2024-09-12T14:40:29Z",
             "valid_to": "2025-07-01T14:24:27Z"
           },
           {
             "new": "case when is_food_item then product_price else 0 end",
             "old": "case when is_food_item is true then product_price else 0 end",
-            "snapshot": "58e095f",
+            "snapshot": "d29bafc",
             "valid_from": "2025-07-01T14:24:27Z",
             "valid_to": null
           }
@@ -365,7 +365,7 @@
               "lifetime_spend agg=sum"
             ],
             "old": null,
-            "snapshot": "b15bfd7",
+            "snapshot": "3b9ceb1",
             "valid_from": "2023-08-30T23:34:22Z",
             "valid_to": "2024-04-04T20:50:59Z"
           },
@@ -381,7 +381,7 @@
               "lifetime_spend_pretax agg=sum",
               "lifetime_spend agg=sum"
             ],
-            "snapshot": "04c0fa0",
+            "snapshot": "12cb051",
             "valid_from": "2024-04-04T20:50:59Z",
             "valid_to": "2025-07-01T14:24:27Z"
           },
@@ -398,7 +398,7 @@
               "lifetime_spend_pretax agg=sum",
               "lifetime_spend agg=sum"
             ],
-            "snapshot": "58e095f",
+            "snapshot": "d29bafc",
             "valid_from": "2025-07-01T14:24:27Z",
             "valid_to": null
           }
@@ -412,7 +412,7 @@
     "rejected_invalid": 0,
     "repeat_digests_identical": true,
     "repeats": 7,
-    "sidecar_digest": "7126bbbd3cedb268",
+    "sidecar_digest": "e6cd55fb400bea79",
     "sidecar_tx_checks": 302,
     "sidecar_tx_matches": 302,
     "source": "https://github.com/dbt-labs/jaffle-shop",
@@ -420,10 +420,10 @@
     "steps": 23,
     "tokens": {
       "body_only_read": 15,
-      "full_bundle": 9061,
+      "full_bundle": 9054,
       "full_bundle_over_raw": 1.9,
-      "full_concept_read": 268,
-      "orient_search_read": 1517,
+      "full_concept_read": 266,
+      "orient_search_read": 1515,
       "orient_search_read_body_only": 1264,
       "raw_sources": 4776,
       "target": "concepts/semantic_models/locations.md",
@@ -435,7 +435,7 @@
     "asof_field_checks": 665,
     "asof_field_matches": 665,
     "asof_matches": 133,
-    "bundle_head": "39e8c5e",
+    "bundle_head": "a88efdf",
     "config": {
       "asof_fields": [
         "description",
@@ -457,7 +457,7 @@
       "New": 16,
       "Revision": 24
     },
-    "determinism_digest": "80b49887f548a4baa1991f62f3745e1d87caa6fef36649441a031b7219d0abc5",
+    "determinism_digest": "41388bc3ff3700f4e99d18d49756f81a145f38a801c52d33e28912675b514d13",
     "drafts": 373,
     "example_history": [
       {
@@ -467,21 +467,21 @@
           {
             "new": "case when is_drink_item = 1 then product_price else 0 end",
             "old": null,
-            "snapshot": "fe50d09",
+            "snapshot": "498d968",
             "valid_from": "2024-04-04T00:00:00Z",
             "valid_to": "2024-09-12T00:00:00Z"
           },
           {
             "new": "case when is_drink_item is true then product_price else 0 end",
             "old": "case when is_drink_item = 1 then product_price else 0 end",
-            "snapshot": "016a328",
+            "snapshot": "328fcd3",
             "valid_from": "2024-09-12T00:00:00Z",
             "valid_to": "2025-07-01T00:00:00Z"
           },
           {
             "new": "case when is_drink_item then product_price else 0 end",
             "old": "case when is_drink_item is true then product_price else 0 end",
-            "snapshot": "438136b",
+            "snapshot": "9eb46ed",
             "valid_from": "2025-07-01T00:00:00Z",
             "valid_to": null
           }
@@ -494,21 +494,21 @@
           {
             "new": "case when is_food_item = 1 then product_price else 0 end",
             "old": null,
-            "snapshot": "39d1a12",
+            "snapshot": "ed67a59",
             "valid_from": "2023-08-30T00:00:00Z",
             "valid_to": "2024-09-12T00:00:00Z"
           },
           {
             "new": "case when is_food_item is true then product_price else 0 end",
             "old": "case when is_food_item = 1 then product_price else 0 end",
-            "snapshot": "016a328",
+            "snapshot": "328fcd3",
             "valid_from": "2024-09-12T00:00:00Z",
             "valid_to": "2025-07-01T00:00:00Z"
           },
           {
             "new": "case when is_food_item then product_price else 0 end",
             "old": "case when is_food_item is true then product_price else 0 end",
-            "snapshot": "438136b",
+            "snapshot": "9eb46ed",
             "valid_from": "2025-07-01T00:00:00Z",
             "valid_to": null
           }
@@ -526,7 +526,7 @@
               "ordered_at:time"
             ],
             "old": null,
-            "snapshot": "32cab94",
+            "snapshot": "d312bad",
             "valid_from": "2024-02-09T00:00:00Z",
             "valid_to": "2024-04-04T00:00:00Z"
           },
@@ -544,7 +544,7 @@
               "order_total_dim:categorical",
               "ordered_at:time"
             ],
-            "snapshot": "fe50d09",
+            "snapshot": "498d968",
             "valid_from": "2024-04-04T00:00:00Z",
             "valid_to": null
           }
@@ -558,7 +558,7 @@
     "rejected_invalid": 0,
     "repeat_digests_identical": true,
     "repeats": 7,
-    "sidecar_digest": "112425e32fc4cb34",
+    "sidecar_digest": "627e69249d703545",
     "sidecar_tx_checks": 133,
     "sidecar_tx_matches": 133,
     "source": "https://github.com/dbt-labs/jaffle-shop",
@@ -570,7 +570,7 @@
         },
         "drafts": 14,
         "held": 0,
-        "merge": "39d1a12",
+        "merge": "ed67a59",
         "source_commit": "720c340",
         "step": 1,
         "time": "2023-08-30T23:34:22Z"
@@ -681,7 +681,7 @@
         },
         "drafts": 13,
         "held": 1,
-        "merge": "32cab94",
+        "merge": "d312bad",
         "source_commit": "6b6f149",
         "step": 11,
         "time": "2024-02-09T20:35:47Z"
@@ -692,7 +692,7 @@
         },
         "drafts": 13,
         "held": 1,
-        "merge": "81b404e",
+        "merge": "6702c67",
         "source_commit": "d975e4d",
         "step": 12,
         "time": "2024-02-26T18:03:54Z"
@@ -761,7 +761,7 @@
         },
         "drafts": 19,
         "held": 4,
-        "merge": "fe50d09",
+        "merge": "498d968",
         "source_commit": "cef41c2",
         "step": 18,
         "time": "2024-04-04T20:50:59Z"
@@ -795,7 +795,7 @@
         },
         "drafts": 19,
         "held": 0,
-        "merge": "016a328",
+        "merge": "328fcd3",
         "source_commit": "0a10ae9",
         "step": 21,
         "time": "2024-09-12T14:40:29Z"
@@ -818,7 +818,7 @@
         },
         "drafts": 19,
         "held": 0,
-        "merge": "438136b",
+        "merge": "9eb46ed",
         "source_commit": "bb3ecd2",
         "step": 23,
         "time": "2025-07-01T14:24:27Z"
@@ -840,7 +840,7 @@
         },
         "drafts": 19,
         "held": 0,
-        "merge": "39e8c5e",
+        "merge": "a88efdf",
         "source_commit": "7be2c58",
         "step": 25,
         "time": "2026-01-21T18:41:18Z"
@@ -852,8 +852,8 @@
       "full_bundle": 33854,
       "full_bundle_over_raw": 7.09,
       "full_concept_read": 1418,
-      "orient_search_read": 2223,
-      "orient_search_read_body_only": 990,
+      "orient_search_read": 2221,
+      "orient_search_read_body_only": 988,
       "raw_sources": 4776,
       "target": "concepts/metrics/food_revenue.md",
       "tokenizer": "tiktoken cl100k_base"
@@ -864,7 +864,7 @@
     "asof_field_checks": 1810,
     "asof_field_matches": 1810,
     "asof_matches": 362,
-    "bundle_head": "62f0fed",
+    "bundle_head": "426cafa",
     "config": {
       "asof_fields": [
         "description",
@@ -886,7 +886,7 @@
       "New": 21,
       "Revision": 7
     },
-    "determinism_digest": "e7039b2517eb84df48d6f5e5c3a4cea7bd1036a87832132be3dd051358e8a539",
+    "determinism_digest": "3f349b392a9a9e9a5b58e15af0b6e9e4046a0e6c4f819bbc226db804fc4a90bc",
     "drafts": 531,
     "example_history": [
       {
@@ -900,7 +900,7 @@
               "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
             ],
             "old": null,
-            "snapshot": "4f01f2d",
+            "snapshot": "df239c0",
             "valid_from": "2023-08-30T16:00:00Z",
             "valid_to": "2024-09-12T20:00:00Z"
           },
@@ -915,7 +915,7 @@
               "food_revenue expr=case when is_food_item = 1 then product_price else 0 end agg=sum",
               "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
             ],
-            "snapshot": "ffa89c3",
+            "snapshot": "84c2903",
             "valid_from": "2024-09-12T20:00:00Z",
             "valid_to": "2024-09-30T16:00:00Z"
           },
@@ -930,7 +930,7 @@
               "food_revenue expr=case when is_food_item is true then product_price else 0 end agg=sum",
               "drink_revenue expr=case when is_drink_item = 1 then product_price else 0 end agg=sum"
             ],
-            "snapshot": "746d5e9",
+            "snapshot": "9ced625",
             "valid_from": "2024-09-30T16:00:00Z",
             "valid_to": "2025-07-01T19:00:00Z"
           },
@@ -945,7 +945,7 @@
               "food_revenue expr=case when is_food_item is true then product_price else 0 end agg=sum",
               "drink_revenue expr=case when is_drink_item is true then product_price else 0 end agg=sum"
             ],
-            "snapshot": "ca9fe43",
+            "snapshot": "8f0497a",
             "valid_from": "2025-07-01T19:00:00Z",
             "valid_to": "2025-07-15T16:00:00Z"
           },
@@ -960,7 +960,7 @@
               "food_revenue expr=case when is_food_item then product_price else 0 end agg=sum",
               "drink_revenue expr=case when is_drink_item is true then product_price else 0 end agg=sum"
             ],
-            "snapshot": "5315f7d",
+            "snapshot": "11b3d4c",
             "valid_from": "2025-07-15T16:00:00Z",
             "valid_to": null
           }
@@ -973,21 +973,21 @@
           {
             "new": "case when is_drink_item = 1 then product_price else 0 end",
             "old": null,
-            "snapshot": "4f01f2d",
+            "snapshot": "df239c0",
             "valid_from": "2023-08-30T16:00:00Z",
             "valid_to": "2024-09-30T16:00:00Z"
           },
           {
             "new": "case when is_drink_item is true then product_price else 0 end",
             "old": "case when is_drink_item = 1 then product_price else 0 end",
-            "snapshot": "746d5e9",
+            "snapshot": "9ced625",
             "valid_from": "2024-09-30T16:00:00Z",
             "valid_to": "2025-07-15T16:00:00Z"
           },
           {
             "new": "case when is_drink_item then product_price else 0 end",
             "old": "case when is_drink_item is true then product_price else 0 end",
-            "snapshot": "5315f7d",
+            "snapshot": "11b3d4c",
             "valid_from": "2025-07-15T16:00:00Z",
             "valid_to": null
           }
@@ -1000,21 +1000,21 @@
           {
             "new": "case when is_food_item = 1 then product_price else 0 end",
             "old": null,
-            "snapshot": "4f01f2d",
+            "snapshot": "df239c0",
             "valid_from": "2023-08-30T16:00:00Z",
             "valid_to": "2024-09-12T20:00:00Z"
           },
           {
             "new": "case when is_food_item is true then product_price else 0 end",
             "old": "case when is_food_item = 1 then product_price else 0 end",
-            "snapshot": "ffa89c3",
+            "snapshot": "84c2903",
             "valid_from": "2024-09-12T20:00:00Z",
             "valid_to": "2025-07-01T19:00:00Z"
           },
           {
             "new": "case when is_food_item then product_price else 0 end",
             "old": "case when is_food_item is true then product_price else 0 end",
-            "snapshot": "ca9fe43",
+            "snapshot": "8f0497a",
             "valid_from": "2025-07-01T19:00:00Z",
             "valid_to": null
           }
@@ -1028,7 +1028,7 @@
     "rejected_invalid": 0,
     "repeat_digests_identical": true,
     "repeats": 7,
-    "sidecar_digest": "83890788e1b1d185",
+    "sidecar_digest": "5fa36edd76f03fe1",
     "sidecar_tx_checks": 362,
     "sidecar_tx_matches": 362,
     "source": "synthetic:synthetic-beans",
@@ -1036,11 +1036,11 @@
     "steps": 25,
     "tokens": {
       "body_only_read": 25,
-      "full_bundle": 5191,
+      "full_bundle": 5184,
       "full_bundle_over_raw": 4.09,
-      "full_concept_read": 332,
-      "orient_search_read": 1238,
-      "orient_search_read_body_only": 931,
+      "full_concept_read": 334,
+      "orient_search_read": 1239,
+      "orient_search_read_body_only": 930,
       "raw_sources": 1269,
       "target": "concepts/semantic_models/order_items.md",
       "tokenizer": "tiktoken cl100k_base"
