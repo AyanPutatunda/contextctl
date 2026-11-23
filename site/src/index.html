@@ -71,10 +71,10 @@
 <section id="problem" class="sec">
   <div class="wrap">
     <h2>The problem</h2>
-    <p class="intro">In the public Jaffle Shop dbt project, the <code>food_revenue</code> metric's expression changed from <code>= 1</code> to <code>is true</code>, and later to a bare boolean. Same name, different meaning.</p>
-    <p>An agent using that project as context answered one way in summer and another way the following winter. Most agent memory systems can't tell you, or prove, which definition it had on each day.</p>
-    <p>Agents act on remembered facts. If you can't say what was believed, when, and from which source, you can't debug the agent or restore it with proof.</p>
-    <p>We already do this for code and for tables. We keep history. We review a change before it becomes official. And we can reconstruct what was believed, and when. The reference implementation treats an agent's beliefs the same way.</p>
+    <p class="intro">Imagine — this is a hypothetical — finance moves the fiscal year from starting in October to starting in February. The metric is still called fiscal year revenue. Same name, different meaning. An agent answered in March, and again in November, using two different definitions. Which one, when, and can you prove it? Most agent memory can't tell you.</p>
+    <p>This happens in real projects too. In the public dbt project called Jaffle Shop, <code>food_revenue</code> was edited more than once: from <code>= 1</code> to <code>is true</code>, and later to a bare boolean. Small edits, but an agent using that project as context was reading a different version on different days. That's the history the paper replayed.</p>
+    <p>Agents act on remembered facts. If you can't say what was believed, when, or from which source, you can't debug the agent, and you can't restore it with proof.</p>
+    <p>We already do this for code, and for tables. We keep history. We review a change before it becomes official. The reference implementation treats an agent's beliefs the same way: you keep the source bytes, a write isn't trusted until it's reviewed, and you can reconstruct what was believed, and when.</p>
   </div>
 </section>
 
