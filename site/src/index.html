@@ -71,15 +71,10 @@
 <section id="problem" class="sec">
   <div class="wrap">
     <h2>The problem</h2>
-    <p class="intro">During a migration, an incident-response agent learns that a critical pipeline belongs to an engineer who has left, and routes alerts to nobody for three weeks. Operators cannot say when it learned this, from what source, what it believed before, or how to restore the correct state with proof.</p>
-    <p>Common memory services keep facts in vendor schemas, keep no content-hash link to the source, and accept agent writes without review. contextctl targets four properties together:</p>
-    <ol class="grid4">
-      <li><strong>Custody</strong><span>of the source bytes behind each belief, by SHA-256.</span></li>
-      <li><strong>Authorization</strong><span>an explicit review step before machine-written knowledge becomes trusted.</span></li>
-      <li><strong>Reconstruction</strong><span>of what was believed, and when, on two time axes.</span></li>
-      <li><strong>Minimal context</strong><span>serving only what a task needs, by progressive disclosure.</span></li>
-    </ol>
-    <p class="muted small">No single mechanism is new; the combination is the point.</p>
+    <p class="intro">In the public Jaffle Shop dbt project, the <code>food_revenue</code> metric's expression changed from <code>= 1</code> to <code>is true</code>, and later to a bare boolean. Same name, different meaning.</p>
+    <p>An agent using that project as context answered one way in summer and another way the following winter. Most agent memory systems can't tell you, or prove, which definition it had on each day.</p>
+    <p>Agents act on remembered facts. If you can't say what was believed, when, and from which source, you can't debug the agent or restore it with proof.</p>
+    <p>We already do this for code and for tables. We keep history. We review a change before it becomes official. And we can reconstruct what was believed, and when. The reference implementation treats an agent's beliefs the same way.</p>
   </div>
 </section>
 
